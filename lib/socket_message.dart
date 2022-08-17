@@ -6,21 +6,7 @@ class SocketMessage {
   static const int c_auth = 4;
   static const int c_dllop = 10;
 
-  static const int op_get_task_list = 1;
-  static const int op_get_products = 2;
-  static const int op_create_task = 3;
-  static const int op_load_task = 4;
-  static const int op_get_employes = 5;
-  static const int op_get_processes = 6;
-  static const int op_save_process = 7;
-  static const int op_update_task_percent = 8;
-  static const int op_get_storage_list = 9;
-  static const int op_get_workshop_list = 10;
-  static const int op_get_stages = 11;
-  static const int op_set_workshop = 12;
-  static const int op_set_state = 13;
-  static const int op_load_workshop = 14;
-  static const int op_load_workshop_detail = 15;
+  static const int op_login = 1;
 
   late BytesBuilder buffer;
   int messageId;
