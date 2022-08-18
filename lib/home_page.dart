@@ -200,6 +200,7 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
     m.addString("waiterclient");
     m.addInt(SocketMessage.op_login);
     m.addString(Config.getString(key_database_name));
+    m.addByte(3);
     m.addString(_usernameController.text);
     m.addString(_passwordController.text);
     ClientSocket.send(m.data());
