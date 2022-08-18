@@ -12,7 +12,7 @@ class Db {
             db.execute(s);
           }
         }, onUpgrade: (db, oldVersion, newVersion) {
-          List<String> oldTable = ["products", "employes", "processes", "storages", "workshop", "stages"];
+          List<String> oldTable = ["halls"];
           for (String t in oldTable) {
             try {
               db.execute("drop table $t");

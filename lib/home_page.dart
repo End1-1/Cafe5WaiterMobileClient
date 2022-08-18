@@ -2,12 +2,11 @@ import 'dart:typed_data';
 
 import 'package:cafe5_mobile_client/base_widget.dart';
 import 'package:cafe5_mobile_client/config.dart';
+import 'package:cafe5_mobile_client/client_socket.dart';
 import 'package:cafe5_mobile_client/network_table.dart';
 import 'package:cafe5_mobile_client/socket_message.dart';
 import 'package:cafe5_mobile_client/translator.dart';
 import 'package:flutter/material.dart';
-
-import 'client_socket.dart';
 
 class WidgetHome extends StatefulWidget {
   @override
@@ -72,7 +71,37 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
           return;
         }
         switch (dllop) {
-
+          case SocketMessage.op_login:
+            Config.setString(key_session_id, m.getString());
+            Config.setString(key_fullname, m.getString());
+            m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllop);
+            m.addString("waiterclient");
+            m.addInt(SocketMessage.op_get_hall_list);
+            m.addString(Config.getString(key_database_name));
+            m.addByte(3);
+            ClientSocket.send(m.data());
+            setState(() {
+              _dataErrorString = tr("Loading halls");
+            });
+            break;
+          case SocketMessage.op_get_hall_list:
+            NetworkTable nt = NetworkTable();
+            nt.readData(m);
+            m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllop);
+            m.addString("waiterclient");
+            m.addInt(SocketMessage.op_get_table_list);
+            m.addString(Config.getString(key_database_name));
+            m.addByte(3);
+            ClientSocket.send(m.data());
+            break;
+          case SocketMessage.op_get_table_list:
+            m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllop);
+            m.addString("waiterclient");
+            m.addInt(SocketMessage.op_get_dish_part1_list);
+            m.addString(Config.getString(key_database_name));
+            m.addByte(3);
+            ClientSocket.send(m.data());
+            break;
         }
         break;
     }

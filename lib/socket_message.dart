@@ -7,6 +7,11 @@ class SocketMessage {
   static const int c_dllop = 10;
 
   static const int op_login = 1;
+  static const int op_get_hall_list = 2;
+  static const int op_get_table_list = 3;
+  static const int op_get_dish_part1_list = 4;
+  static const int op_get_dish_part2_list = 5;
+  static const int op_get_dish_dish_list = 6;
 
   late BytesBuilder buffer;
   int messageId;

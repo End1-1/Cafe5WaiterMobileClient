@@ -5,14 +5,12 @@ const key_server_port = "key_server_port";
 const key_server_username = "key_server_username";
 const key_server_password = "key_server_password";
 const key_database_name = "key_database_name";
+const key_session_id = "key_session_id";
+const key_fullname = "key_fullname";
 
 List<String> dbCreate = [
-  "create table products (id int primary key, name text)",
-  "create table employes (id int primary key, group_id int, name text)",
-  "create table processes (id int primary key, name text)",
-  "create table storages (id int primary key, name text)",
-  "create table workshop (id int primary key, name text)",
-  "create table stages (id int primary key, name text)"
+  "create table halls (id int primary key, name text)",
+  "create table tables (id int primary key, hall int, state int, name text)"
 ];
 
 
