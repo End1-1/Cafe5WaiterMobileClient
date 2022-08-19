@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:cafe5_mobile_client/base_widget.dart';
 import 'package:cafe5_mobile_client/config.dart';
+import 'package:cafe5_mobile_client/db.dart';
 import 'package:cafe5_mobile_client/client_socket.dart';
 import 'package:cafe5_mobile_client/network_table.dart';
 import 'package:cafe5_mobile_client/socket_message.dart';
@@ -19,7 +20,6 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
   bool _dataLoading = false;
   bool _dataError = false;
   bool _allDataLoaded = false;
-  NetworkTable _networkTable = NetworkTable();
   String _dataErrorString = "";
   late AnimationController animationController;
   TextEditingController _usernameController = TextEditingController();
@@ -81,12 +81,21 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
             m.addByte(3);
             ClientSocket.send(m.data());
             setState(() {
-              _dataErrorString = tr("Loading halls");
+              _dataErrorString = tr("Loading list of halls");
             });
             break;
           case SocketMessage.op_get_hall_list:
             NetworkTable nt = NetworkTable();
             nt.readData(m);
+            Db.delete("delete from halls");
+            for (int i = 0; i < nt.rowCount; i++) {
+              Db.insert("insert into halls (id, menuid, servicevalue, name) values (?,?,?,?)", [
+                nt.getRawData(i, 0), nt.getRawData(i, 1), nt.getRawData(i, 2), nt.getRawData(i, 3)    
+              ]);
+            }
+            setState(() {
+              _dataErrorString = tr("Loading list of tables");
+            });
             m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllop);
             m.addString("waiterclient");
             m.addInt(SocketMessage.op_get_table_list);
@@ -95,12 +104,33 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
             ClientSocket.send(m.data());
             break;
           case SocketMessage.op_get_table_list:
+            NetworkTable nt = NetworkTable();
+            nt.readData(m);
+            Db.delete("delete from tables");
+            for (int i = 0; i < nt.rowCount; i++) {
+              Db.insert("insert into tables (id, hall, state, name, q) values (?,?,?,?, ?)", [
+                nt.getRawData(i, 0), nt.getRawData(i, 1), nt.getRawData(i, 2), nt.getRawData(i, 3), i
+              ]);
+            }
+            setState(() {
+              _dataErrorString = tr("Loading list of dish part 1");
+            });
             m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllop);
             m.addString("waiterclient");
             m.addInt(SocketMessage.op_get_dish_part1_list);
             m.addString(Config.getString(key_database_name));
             m.addByte(3);
             ClientSocket.send(m.data());
+            break;
+          case SocketMessage.op_get_dish_part1_list:
+            NetworkTable nt = NetworkTable();
+            nt.readData(m);
+            Db.delete("delete from dish_part1");
+            for (int i = 0; i < nt.rowCount; i++) {
+              Db.insert("insert into dish_part1 (id, name) values (?,?)", [
+                nt.getRawData(i, 0), nt.getRawData(i, 1)
+              ]);
+            }
             break;
         }
         break;

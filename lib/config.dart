@@ -9,8 +9,11 @@ const key_session_id = "key_session_id";
 const key_fullname = "key_fullname";
 
 List<String> dbCreate = [
-  "create table halls (id int primary key, name text)",
-  "create table tables (id int primary key, hall int, state int, name text)"
+  "create table halls (id int primary key, menuid int, servicevalue real, name, text)",
+  "create table tables (id int primary key, hall int, state int, name text, q int)",
+  "create table dish_part1 (id int primary key, name text)",
+  "create table dish_part2 (id int primary key, part1 int, name text)",
+  "create table dish (id int, part2 int, name text, price real)"
 ];
 
 
