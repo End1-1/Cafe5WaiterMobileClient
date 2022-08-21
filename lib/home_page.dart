@@ -7,6 +7,7 @@ import 'package:cafe5_mobile_client/client_socket.dart';
 import 'package:cafe5_mobile_client/network_table.dart';
 import 'package:cafe5_mobile_client/socket_message.dart';
 import 'package:cafe5_mobile_client/translator.dart';
+import 'package:cafe5_mobile_client/widget_halls.dart';
 import 'package:flutter/material.dart';
 
 class WidgetHome extends StatefulWidget {
@@ -19,7 +20,6 @@ class WidgetHome extends StatefulWidget {
 class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
   bool _dataLoading = false;
   bool _dataError = false;
-  bool _allDataLoaded = false;
   String _dataErrorString = "";
   late AnimationController animationController;
   TextEditingController _usernameController = TextEditingController();
@@ -131,6 +131,27 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
                 nt.getRawData(i, 0), nt.getRawData(i, 1)
               ]);
             }
+            m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllop);
+            m.addString("waiterclient");
+            m.addInt(SocketMessage.op_get_dish_part2_list);
+            m.addString(Config.getString(key_database_name));
+            m.addByte(3);
+            ClientSocket.send(m.data());
+            setState(() {
+              _dataErrorString = tr("Loading list of dish part 2");
+            });
+            break;
+          case SocketMessage.op_get_dish_part2_list:
+            NetworkTable nt = NetworkTable();
+            nt.readData(m);
+            Db.delete("delete from dish_part2");
+            for (int i = 0; i < nt.rowCount; i++) {
+              Db.insert("insert into dish_part2 (id, part1, textcolor, bgcolor, name, q) values (?,?,?,?,?,?)", [
+                nt.getRawData(i, 0), nt.getRawData(i, 1), nt.getRawData(i, 2), nt.getRawData(i, 3), nt.getRawData(i, 4), nt.getRawData(i, 5)
+              ]);
+            }
+
+            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (BuildContext context) => WidgetHalls()), (route) => false);
             break;
         }
         break;
