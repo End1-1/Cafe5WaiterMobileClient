@@ -13,6 +13,8 @@ class SocketMessage {
   static const int op_get_dish_part2_list = 5;
   static const int op_get_dish_dish_list = 6;
   static const int op_login_pashhash = 7;
+  static const int op_open_table = 8;
+  static const int op_unlock_table = 9;
 
   late BytesBuilder buffer;
   int messageId;

@@ -129,8 +129,8 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
             nt.readFromSocketMessage(m);
             Db.delete("delete from tables");
             for (int i = 0; i < nt.rowCount; i++) {
-              Db.insert("insert into tables (id, hall, state, name, q) values (?,?,?,?, ?)", [
-                nt.getRawData(i, 0), nt.getRawData(i, 1), nt.getRawData(i, 2), nt.getRawData(i, 3), i
+              Db.insert("insert into tables (id, hall, state, name, orderid, q) values (?,?,?,?,?,?)", [
+                nt.getRawData(i, 0), nt.getRawData(i, 1), nt.getRawData(i, 2), nt.getRawData(i, 3), nt.getRawData(i, 3), i
               ]);
             }
             setState(() {

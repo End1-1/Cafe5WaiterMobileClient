@@ -23,7 +23,7 @@ class Db {
           for (String s in createList) {
             db.execute(s);
           }
-        }, version: 20)
+        }, version: 23)
             .then((value) => _db = value);
       });
     }
