@@ -1,4 +1,4 @@
-import 'package:cafe5_mobile_client/socket_message.dart';
+import 'package:cafe5_waiter_mobile_client/socket_message.dart';
 
 const datatype_int = 1;
 const datatype_double = 2;

@@ -1,5 +1,5 @@
-name: cafe5_mobile_client
-description: Cafe5MobileClient
+name: cafe5_waiter_mobile_client
+description: Cafe5WaiterMobileClient
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.

@@ -1,4 +1,4 @@
-import 'package:cafe5_mobile_client/translator.dart';
+import 'package:cafe5_waiter_mobile_client/translator.dart';
 import 'package:flutter/material.dart';
 
 Widget bottomMenu() {

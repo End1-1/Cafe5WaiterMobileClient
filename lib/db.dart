@@ -41,4 +41,8 @@ class Db {
   static Future<List<Map<String, dynamic?>>> query(String table) async {
     return await _db!.query(table);
   }
+
+  static Future<List<Map<String, dynamic?>>> rawQuery(String sql) async {
+    return await _db!.rawQuery(sql);
+  }
 }

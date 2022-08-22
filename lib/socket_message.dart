@@ -12,6 +12,7 @@ class SocketMessage {
   static const int op_get_dish_part1_list = 4;
   static const int op_get_dish_part2_list = 5;
   static const int op_get_dish_dish_list = 6;
+  static const int op_login_pashhash = 7;
 
   late BytesBuilder buffer;
   int messageId;
@@ -108,11 +109,13 @@ class SocketMessage {
   }
 
   Uint8List data() {
+    int pn = packetNumber();
+    print("packet number: $pn");
     final BytesBuilder finalBuffer = BytesBuilder();
     //pattern
     finalBuffer.add([0x03, 0x04, 0x15]);
     //packet number
-    finalBuffer.add(Uint8List(4)..buffer.asByteData().setInt32(0, packetNumber(), Endian.little));
+    finalBuffer.add(Uint8List(4)..buffer.asByteData().setInt32(0, pn, Endian.little));
     //message id
     finalBuffer.add(Uint8List(4)..buffer.asByteData().setInt32(0, messageId, Endian.little));
     //command
@@ -131,7 +134,6 @@ class SocketMessage {
 
   static int packetNumber() {
     int pn = _packetNumberCounter++;
-    print("Packet: " + pn.toString());
     return pn;
   }
 

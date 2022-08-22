@@ -7,6 +7,7 @@ const key_server_password = "key_server_password";
 const key_database_name = "key_database_name";
 const key_session_id = "key_session_id";
 const key_fullname = "key_fullname";
+const key_use_this_hall = "key_use_this_hall";
 
 List<String> dbCreate = [
   "create table halls (id int primary key, menuid int, servicevalue real, name, text)",
@@ -43,7 +44,7 @@ class Config {
   }
 
   static int getInt(String key) {
-    return _config._preferences.getInt(key)!;
+    return _config._preferences.getInt(key) ?? 0;
   }
 
   static void setDouble(String key, double value) {
@@ -51,6 +52,14 @@ class Config {
   }
 
   static double getDouble(String key) {
-    return _config._preferences.getDouble(key)!;
+    return _config._preferences.getDouble(key) ?? 0;
+  }
+
+  static void setBool(String key, bool value) {
+    _config._preferences.setBool(key, value);
+  }
+
+  static bool getBool(String key) {
+    return _config._preferences.getBool(key) ?? false;
   }
 }

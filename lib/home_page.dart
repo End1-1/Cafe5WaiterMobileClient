@@ -1,16 +1,22 @@
+import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:cafe5_mobile_client/base_widget.dart';
-import 'package:cafe5_mobile_client/config.dart';
-import 'package:cafe5_mobile_client/db.dart';
-import 'package:cafe5_mobile_client/client_socket.dart';
-import 'package:cafe5_mobile_client/network_table.dart';
-import 'package:cafe5_mobile_client/socket_message.dart';
-import 'package:cafe5_mobile_client/translator.dart';
-import 'package:cafe5_mobile_client/widget_halls.dart';
+import 'package:cafe5_waiter_mobile_client/base_widget.dart';
+import 'package:cafe5_waiter_mobile_client/config.dart';
+import 'package:cafe5_waiter_mobile_client/db.dart';
+import 'package:cafe5_waiter_mobile_client/client_socket.dart';
+import 'package:cafe5_waiter_mobile_client/network_table.dart';
+import 'package:cafe5_waiter_mobile_client/socket_message.dart';
+import 'package:cafe5_waiter_mobile_client/translator.dart';
+import 'package:cafe5_waiter_mobile_client/widget_halls.dart';
 import 'package:flutter/material.dart';
 
 class WidgetHome extends StatefulWidget {
+
+  WidgetHome() {
+    print("Create WidgetHome");
+  }
+
   @override
   State<StatefulWidget> createState() {
     return WidgetHomeState();
@@ -35,6 +41,17 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
       });
     animationController.repeat(reverse: false);
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      if (Config.getString(key_session_id).isNotEmpty) {
+        SocketMessage m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllop);
+        m.addString("waiterclient");
+        m.addInt(SocketMessage.op_login_pashhash);
+        m.addString(Config.getString(key_database_name));
+        m.addByte(3);
+        m.addString(Config.getString(key_session_id));
+        sendSocketMessage(m);
+      }
+    });
   }
 
   @override
@@ -48,6 +65,10 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
     _dataLoading = false;
     SocketMessage m = SocketMessage(messageId: 0, command: 0);
     m.setBuffer(data);
+    if (!checkSocketMessage(m)) {
+      return;
+    }
+    print("command ${m.command}");
     int dllok = m.getByte();
     switch (dllok) {
       case 0:
@@ -79,17 +100,17 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
             m.addInt(SocketMessage.op_get_hall_list);
             m.addString(Config.getString(key_database_name));
             m.addByte(3);
-            ClientSocket.send(m.data());
+            sendSocketMessage(m);
             setState(() {
               _dataErrorString = tr("Loading list of halls");
             });
             break;
           case SocketMessage.op_get_hall_list:
             NetworkTable nt = NetworkTable();
-            nt.readData(m);
+            nt.readFromSocketMessage(m);
             Db.delete("delete from halls");
             for (int i = 0; i < nt.rowCount; i++) {
-              Db.insert("insert into halls (id, menuid, servicevalue, name) values (?,?,?,?)", [
+              Db.insert("insert into halls (id, name, menuid, servicevalue) values (?,?,?,?)", [
                 nt.getRawData(i, 0), nt.getRawData(i, 1), nt.getRawData(i, 2), nt.getRawData(i, 3)    
               ]);
             }
@@ -101,11 +122,11 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
             m.addInt(SocketMessage.op_get_table_list);
             m.addString(Config.getString(key_database_name));
             m.addByte(3);
-            ClientSocket.send(m.data());
+            sendSocketMessage(m);
             break;
           case SocketMessage.op_get_table_list:
             NetworkTable nt = NetworkTable();
-            nt.readData(m);
+            nt.readFromSocketMessage(m);
             Db.delete("delete from tables");
             for (int i = 0; i < nt.rowCount; i++) {
               Db.insert("insert into tables (id, hall, state, name, q) values (?,?,?,?, ?)", [
@@ -120,11 +141,11 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
             m.addInt(SocketMessage.op_get_dish_part1_list);
             m.addString(Config.getString(key_database_name));
             m.addByte(3);
-            ClientSocket.send(m.data());
+            sendSocketMessage(m);
             break;
           case SocketMessage.op_get_dish_part1_list:
             NetworkTable nt = NetworkTable();
-            nt.readData(m);
+            nt.readFromSocketMessage(m);
             Db.delete("delete from dish_part1");
             for (int i = 0; i < nt.rowCount; i++) {
               Db.insert("insert into dish_part1 (id, name) values (?,?)", [
@@ -136,14 +157,14 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
             m.addInt(SocketMessage.op_get_dish_part2_list);
             m.addString(Config.getString(key_database_name));
             m.addByte(3);
-            ClientSocket.send(m.data());
+            sendSocketMessage(m);
             setState(() {
               _dataErrorString = tr("Loading list of dish part 2");
             });
             break;
           case SocketMessage.op_get_dish_part2_list:
             NetworkTable nt = NetworkTable();
-            nt.readData(m);
+            nt.readFromSocketMessage(m);
             Db.delete("delete from dish_part2");
             for (int i = 0; i < nt.rowCount; i++) {
               Db.insert("insert into dish_part2 (id, part1, textcolor, bgcolor, name, q) values (?,?,?,?,?,?)", [
@@ -152,6 +173,17 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
             }
 
             Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (BuildContext context) => WidgetHalls()), (route) => false);
+            break;
+          case SocketMessage.op_login_pashhash:
+            m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllop);
+            m.addString("waiterclient");
+            m.addInt(SocketMessage.op_get_hall_list);
+            m.addString(Config.getString(key_database_name));
+            m.addByte(3);
+            sendSocketMessage(m);
+            setState(() {
+              _dataErrorString = tr("Loading list of halls");
+            });
             break;
         }
         break;
@@ -283,6 +315,6 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
     m.addByte(3);
     m.addString(_usernameController.text);
     m.addString(_passwordController.text);
-    ClientSocket.send(m.data());
+    sendSocketMessage(m);
   }
 }

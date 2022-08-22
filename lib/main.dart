@@ -1,7 +1,7 @@
-import 'package:cafe5_mobile_client/client_socket.dart';
-import 'package:cafe5_mobile_client/config.dart';
-import 'package:cafe5_mobile_client/db.dart';
-import 'package:cafe5_mobile_client/widget_choose_settings.dart';
+import 'package:cafe5_waiter_mobile_client/client_socket.dart';
+import 'package:cafe5_waiter_mobile_client/config.dart';
+import 'package:cafe5_waiter_mobile_client/db.dart';
+import 'package:cafe5_waiter_mobile_client/widget_choose_settings.dart';
 import 'package:flutter/material.dart';
 
 void main() async {
@@ -9,6 +9,7 @@ void main() async {
   await Config.init();
   Db.init(dbCreate);
   ClientSocket.init(Config.getString(key_server_address), int.tryParse(Config.getString(key_server_port)) ?? 0);
+  ClientSocket.socket.connect();
   runApp(const MyApp());
 }
 
