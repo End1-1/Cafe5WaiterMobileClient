@@ -21,6 +21,12 @@ class WidgetHallsState extends BaseWidgetState<WidgetHalls> {
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      if (Config.getBool(key_use_this_hall)) {
+        if (Config.getInt(key_use_this_hall_id) > 0) {
+          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (BuildContext context) => WidgetTables(hall: Config.getInt(key_use_this_hall_id))), (route) => false);
+          return;
+        }
+      }
       Db.query("halls").then((map) {
         List.generate(map.length, (i) {
           ClassHall ch = ClassHall(id: map[i]["id"], name: map[i]["name"], menu: map[i]["menuid"], servicevalue: map[i]["servicevalue"]);
@@ -82,6 +88,7 @@ class WidgetHallsState extends BaseWidgetState<WidgetHalls> {
           child: OutlinedButton(
               style: OutlinedButton.styleFrom(padding: EdgeInsets.only(left: 3, right: 3)),
               onPressed: () {
+                Config.setInt(key_use_this_hall_id,  _halls[i].id);
                 Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (BuildContext context) => WidgetTables(hall: _halls[i].id)), (route) => false);
               },
               child: Text(

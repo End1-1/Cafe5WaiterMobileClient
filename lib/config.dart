@@ -8,13 +8,16 @@ const key_database_name = "key_database_name";
 const key_session_id = "key_session_id";
 const key_fullname = "key_fullname";
 const key_use_this_hall = "key_use_this_hall";
+const key_use_this_hall_id = "key_use_this_hall_id";
+const key_data_dont_update = "key_data_dont_update";
 
 List<String> dbCreate = [
   "create table halls (id int primary key, menuid int, servicevalue real, name, text)",
   "create table tables (id int primary key, hall int, state int, name text, orderid text, q int)",
   "create table dish_part1 (id int primary key, name text)",
   "create table dish_part2 (id int primary key, part1 int, bgcolor int, textcolor int, name text, q int)",
-  "create table dish (id int, part2 int, name text, price real)"
+  "create table dish (id int, part2 int, name text, price real)",
+  "create table car_model (id int, name text)"
 ];
 
 

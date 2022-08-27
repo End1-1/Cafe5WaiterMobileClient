@@ -5,6 +5,7 @@ class SocketMessage {
   static const int c_hello = 1;
   static const int c_auth = 4;
   static const int c_dllop = 10;
+  static const int c_dllplugin = 11;
 
   static const int op_login = 1;
   static const int op_get_hall_list = 2;
@@ -15,6 +16,12 @@ class SocketMessage {
   static const int op_login_pashhash = 7;
   static const int op_open_table = 8;
   static const int op_unlock_table = 9;
+  static const int op_car_model = 10;
+  static const int op_search_licenseplate = 11;
+  static const int op_create_header = 12;
+  static const int op_set_car = 13;
+
+  static const String waiterclientp = "8b90e61a-1385-4fb4-85ce-f23849045e69";
 
   late BytesBuilder buffer;
   int messageId;
