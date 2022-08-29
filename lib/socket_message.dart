@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
+import 'package:cafe5_waiter_mobile_client/config.dart';
 
 class SocketMessage {
   static const int c_hello = 1;
@@ -20,6 +22,13 @@ class SocketMessage {
   static const int op_search_licenseplate = 11;
   static const int op_create_header = 12;
   static const int op_set_car = 13;
+  static const int op_open_order = 14;
+  static const int op_get_car = 15;
+  static const int op_dish_menu = 16;
+  static const int op_add_dish_to_order = 17;
+  static const int op_remove_dish_from_order = 18;
+  static const int op_modify_order_dish = 19;
+  static const int op_print_service = 20;
 
   static const String waiterclientp = "8b90e61a-1385-4fb4-85ce-f23849045e69";
 
@@ -112,8 +121,9 @@ class SocketMessage {
 
   String getString() {
     int sz = getInt();
-    String str = utf8.decode(buffer.toBytes().sublist(_dataPosition, _dataPosition + sz));
+    String str = utf8.decode(buffer.toBytes().sublist(_dataPosition, _dataPosition + sz - 1));
     _dataPosition += sz;
+    print(str);
     return str;
   }
 
@@ -148,5 +158,14 @@ class SocketMessage {
 
   static void resetPacketCounter() {
     _packetNumberCounter = 1;
+  }
+
+  static SocketMessage dllplugin(int op) {
+    print("new socketmessage $c_dllplugin : $op");
+    SocketMessage m = SocketMessage(messageId: messageNumber(), command: c_dllplugin);
+    m.addString(waiterclientp);
+    m.addInt(op);
+    m.addByte(Config.getInt(key_protocol_version));
+    return m;
   }
 }

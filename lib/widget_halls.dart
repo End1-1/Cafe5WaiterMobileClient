@@ -4,7 +4,6 @@ import 'package:cafe5_waiter_mobile_client/base_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:cafe5_waiter_mobile_client/translator.dart';
 import 'package:cafe5_waiter_mobile_client/config.dart';
-import 'package:cafe5_waiter_mobile_client/db.dart';
 import 'package:cafe5_waiter_mobile_client/widget_tables.dart';
 import 'package:cafe5_waiter_mobile_client/class_hall.dart';
 
@@ -16,7 +15,6 @@ class WidgetHalls extends StatefulWidget {
 }
 
 class WidgetHallsState extends BaseWidgetState<WidgetHalls> {
-  List<ClassHall> _halls = [];
 
   @override
   void initState() {
@@ -27,13 +25,6 @@ class WidgetHallsState extends BaseWidgetState<WidgetHalls> {
           return;
         }
       }
-      Db.query("halls").then((map) {
-        List.generate(map.length, (i) {
-          ClassHall ch = ClassHall(id: map[i]["id"], name: map[i]["name"], menu: map[i]["menuid"], servicevalue: map[i]["servicevalue"]);
-          _halls.add(ch);
-        });
-        setState(() {});
-      });
     });
   }
 
@@ -67,7 +58,7 @@ class WidgetHallsState extends BaseWidgetState<WidgetHalls> {
   }
 
   Widget _hallList() {
-    if (_halls.isEmpty) {
+    if (ClassHall.list.isEmpty) {
       return Text("Empty list of hall");
     }
     int colCount = 2;
@@ -80,7 +71,7 @@ class WidgetHallsState extends BaseWidgetState<WidgetHalls> {
     List<DataRow> rows = [];
     int col = 0;
     List<DataCell> dc = [];
-    for (int i = 0; i < _halls.length; i++) {
+    for (int i = 0; i < ClassHall.list.length; i++) {
       DataCell dataCell = DataCell(Container(
           padding: EdgeInsets.all(5),
           width: colWidth,
@@ -88,11 +79,11 @@ class WidgetHallsState extends BaseWidgetState<WidgetHalls> {
           child: OutlinedButton(
               style: OutlinedButton.styleFrom(padding: EdgeInsets.only(left: 3, right: 3)),
               onPressed: () {
-                Config.setInt(key_use_this_hall_id,  _halls[i].id);
-                Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (BuildContext context) => WidgetTables(hall: _halls[i].id)), (route) => false);
+                Config.setInt(key_use_this_hall_id,  ClassHall.list[i].id);
+                Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (BuildContext context) => WidgetTables(hall: ClassHall.list[i].id)), (route) => false);
               },
               child: Text(
-                _halls[i].name,
+                ClassHall.list[i].name,
                 overflow: TextOverflow.ellipsis,
               ))));
       dc.add(dataCell);

@@ -55,6 +55,13 @@ class WidgetSetCarState extends BaseWidgetState<WidgetSetCar> {
             _setModel(m.getInt());
             _setCustomer(m.getInt(), m.getString(), m.getString());
             break;
+        case SocketMessage.op_set_car:
+          widget.table.orderid = m.getString();
+          _customer = ClassCustomer(id: m.getInt(), name: m.getString(), phone: m.getString());
+          widget.table.car = _carModel;
+          widget.table.customer = _customer;
+          Navigator.pop(context, widget.table);
+          break;
         }
     }
   }
@@ -62,7 +69,20 @@ class WidgetSetCarState extends BaseWidgetState<WidgetSetCar> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {});
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      setState(() {
+        if (widget.table.car != null) {
+          _carModel = widget.table.car;
+          _plateController.text = _carModel!.licensePlate;
+          _carNameController.text = _carModel!.name;
+        }
+        if (widget.table.customer != null) {
+          _customer = widget.table.customer;
+          _customerController.text = _customer!.name;
+          _customerPhoneController.text = _customer!.phone;
+        }
+      });
+    });
   }
 
   @override
@@ -272,6 +292,10 @@ class WidgetSetCarState extends BaseWidgetState<WidgetSetCar> {
       sd(tr("Select car model"));
       return;
     }
+    if (_customerController.text.isEmpty) {
+      sd(tr("Enter the customer name"));
+      return;
+    }
     if (widget.table.orderid == null || widget.table.orderid!.isEmpty) {
       sq(tr("Create new order?"), (){
         _setCarUploadInfo();
@@ -282,11 +306,13 @@ class WidgetSetCarState extends BaseWidgetState<WidgetSetCar> {
   }
 
   void _setCarUploadInfo() {
+    print("CUstomer name ${_customerController.text}");
     SocketMessage m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllplugin);
     m.addString(SocketMessage.waiterclientp);
     m.addInt(SocketMessage.op_set_car);
-    m.addInt(_carModel!.id);
+    m.addByte(3);
     m.addInt(widget.table.id);
+    m.addInt(_carModel!.id);
     m.addString(_plateController.text);
     m.addInt(_customer == null ? 0 : _customer!.id);
     m.addString(_customerController.text);

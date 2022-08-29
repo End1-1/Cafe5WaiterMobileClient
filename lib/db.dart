@@ -12,7 +12,7 @@ class Db {
             db.execute(s);
           }
         }, onUpgrade: (db, oldVersion, newVersion) {
-          List<String> oldTable = ["halls", "tables", "dish_part1", "dish_part2", "dish", "car_model"];
+          List<String> oldTable = ["halls", "tables", "dish_part1", "dish_part2", "dish", "car_model", "dish_menu"];
           for (String t in oldTable) {
             try {
               db.execute("drop table $t");
@@ -23,7 +23,7 @@ class Db {
           for (String s in createList) {
             db.execute(s);
           }
-        }, version: 24)
+        }, version: 30)
             .then((value) => _db = value);
       });
     }
@@ -38,8 +38,12 @@ class Db {
     return result;
   }
 
-  static Future<List<Map<String, dynamic?>>> query(String table) async {
-    return await _db!.query(table);
+  static Future<List<Map<String, dynamic?>>> query(String table, {String? orderBy,}) async {
+    return await _db!.query(table, orderBy: orderBy);
+  }
+
+  static Future<int> update(String table, Map<String, Object?> values,  {String? where,  List<Object?>? whereArgs,}) async {
+    return await _db!.update(table, values, where: where, whereArgs: whereArgs);
   }
 
   static Future<List<Map<String, dynamic?>>> rawQuery(String sql) async {

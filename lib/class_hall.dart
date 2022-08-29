@@ -7,4 +7,15 @@ class ClassHall {
   double servicevalue;
 
   ClassHall({required this.id, required this.name, required this.menu, required this.servicevalue});
+
+  static List<ClassHall> list = [];
+
+  static ClassHall? getHall(int id) {
+    for (ClassHall ch in list) {
+      if (ch.id == id) {
+        return ch;
+      }
+    }
+    return null;
+  }
 }

@@ -3,6 +3,11 @@ import 'dart:typed_data';
 
 import 'package:cafe5_waiter_mobile_client/base_widget.dart';
 import 'package:cafe5_waiter_mobile_client/class_car_model.dart';
+import 'package:cafe5_waiter_mobile_client/class_dish.dart';
+import 'package:cafe5_waiter_mobile_client/class_dishpart2.dart';
+import 'package:cafe5_waiter_mobile_client/class_hall.dart';
+import 'package:cafe5_waiter_mobile_client/class_menudish.dart';
+import 'package:cafe5_waiter_mobile_client/class_table.dart';
 import 'package:cafe5_waiter_mobile_client/config.dart';
 import 'package:cafe5_waiter_mobile_client/db.dart';
 import 'package:cafe5_waiter_mobile_client/client_socket.dart';
@@ -13,7 +18,6 @@ import 'package:cafe5_waiter_mobile_client/widget_halls.dart';
 import 'package:flutter/material.dart';
 
 class WidgetHome extends StatefulWidget {
-
   WidgetHome() {
     print("Create WidgetHome");
   }
@@ -33,6 +37,7 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
 
   @override
   void initState() {
+    Config.setInt(key_protocol_version, 3);
     animationController = AnimationController(
       vsync: this,
       duration: Duration(seconds: 1),
@@ -43,10 +48,7 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       if (Config.getString(key_session_id).isNotEmpty) {
-        SocketMessage m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllplugin);
-        m.addString(SocketMessage.waiterclientp);
-        m.addInt(SocketMessage.op_login_pashhash);
-        m.addByte(3);
+        SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_login_pashhash);
         m.addString(Config.getString(key_session_id));
         sendSocketMessage(m);
       }
@@ -83,11 +85,7 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
             _startWithoutDataLoad();
             return;
           }
-          m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllop);
-          m.addString("waiterclient");
-          m.addInt(SocketMessage.op_get_hall_list);
-          m.addString(Config.getString(key_database_name));
-          m.addByte(3);
+          m = SocketMessage.dllplugin(SocketMessage.op_get_hall_list);
           sendSocketMessage(m);
           setState(() {
             _progressString = tr("Loading list of halls");
@@ -98,18 +96,12 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
           nt.readFromSocketMessage(m);
           Db.delete("delete from halls");
           for (int i = 0; i < nt.rowCount; i++) {
-            Db.insert("insert into halls (id, name, menuid, servicevalue) values (?,?,?,?)", [
-              nt.getRawData(i, 0), nt.getRawData(i, 1), nt.getRawData(i, 2), nt.getRawData(i, 3)
-            ]);
+            Db.insert("insert into halls (id, name, menuid, servicevalue) values (?,?,?,?)", [nt.getRawData(i, 0), nt.getRawData(i, 1), nt.getRawData(i, 2), nt.getRawData(i, 3)]);
           }
           setState(() {
             _progressString = tr("Loading list of tables");
           });
-          m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllop);
-          m.addString("waiterclient");
-          m.addInt(SocketMessage.op_get_table_list);
-          m.addString(Config.getString(key_database_name));
-          m.addByte(3);
+          m = SocketMessage.dllplugin(SocketMessage.op_get_table_list);
           sendSocketMessage(m);
           break;
         case SocketMessage.op_get_table_list:
@@ -117,18 +109,12 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
           nt.readFromSocketMessage(m);
           Db.delete("delete from tables");
           for (int i = 0; i < nt.rowCount; i++) {
-            Db.insert("insert into tables (id, hall, state, name, orderid, q) values (?,?,?,?,?,?)", [
-              nt.getRawData(i, 0), nt.getRawData(i, 1), nt.getRawData(i, 2), nt.getRawData(i, 3), nt.getRawData(i, 3), i
-            ]);
+            Db.insert("insert into tables (id, hall, state, name, orderid, q) values (?,?,?,?,?,?)", [nt.getRawData(i, 0), nt.getRawData(i, 1), nt.getRawData(i, 2), nt.getRawData(i, 3), nt.getRawData(i, 4), i]);
           }
           setState(() {
             _progressString = tr("Loading list of dish part 1");
           });
-          m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllop);
-          m.addString("waiterclient");
-          m.addInt(SocketMessage.op_get_dish_part1_list);
-          m.addString(Config.getString(key_database_name));
-          m.addByte(3);
+          m = SocketMessage.dllplugin(SocketMessage.op_get_dish_part1_list);
           sendSocketMessage(m);
           break;
         case SocketMessage.op_get_dish_part1_list:
@@ -136,15 +122,9 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
           nt.readFromSocketMessage(m);
           Db.delete("delete from dish_part1");
           for (int i = 0; i < nt.rowCount; i++) {
-            Db.insert("insert into dish_part1 (id, name) values (?,?)", [
-              nt.getRawData(i, 0), nt.getRawData(i, 1)
-            ]);
+            Db.insert("insert into dish_part1 (id, name) values (?,?)", [nt.getRawData(i, 0), nt.getRawData(i, 1)]);
           }
-          m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllop);
-          m.addString("waiterclient");
-          m.addInt(SocketMessage.op_get_dish_part2_list);
-          m.addString(Config.getString(key_database_name));
-          m.addByte(3);
+          m = SocketMessage.dllplugin(SocketMessage.op_get_dish_part2_list);
           sendSocketMessage(m);
           setState(() {
             _progressString = tr("Loading list of dish part 2");
@@ -155,18 +135,41 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
           nt.readFromSocketMessage(m);
           Db.delete("delete from dish_part2");
           for (int i = 0; i < nt.rowCount; i++) {
-            Db.insert("insert into dish_part2 (id, part1, textcolor, bgcolor, name, q) values (?,?,?,?,?,?)", [
-              nt.getRawData(i, 0), nt.getRawData(i, 1), nt.getRawData(i, 2), nt.getRawData(i, 3), nt.getRawData(i, 4), nt.getRawData(i, 5)
-            ]);
+            Db.insert("insert into dish_part2 (id, parentid, part1, textcolor, bgcolor, name, q) values (?,?,?,?,?,?,?)",
+                [nt.getRawData(i, 0), nt.getRawData(i, 1), nt.getRawData(i, 2), nt.getRawData(i, 3), nt.getRawData(i, 4), nt.getRawData(i, 5), nt.getRawData(i, 6)]);
+          }
+          setState(() {
+            _progressString = tr("Loading dishes");
+          });
+          m = SocketMessage.dllplugin(SocketMessage.op_get_dish_dish_list);
+          sendSocketMessage(m);
+          break;
+        case SocketMessage.op_get_dish_dish_list:
+          NetworkTable nt = NetworkTable();
+          nt.readFromSocketMessage(m);
+          Db.delete("delete from dish");
+          for (int i = 0; i < nt.rowCount; i++) {
+            Db.insert("insert into dish (id, part2, bgcolor, textcolor, name, q) values (?,?,?,?,?,?)",
+                [nt.getRawData(i, 0), nt.getRawData(i, 1), nt.getRawData(i, 2), nt.getRawData(i, 3), nt.getRawData(i, 4), nt.getRawData(i, 5)]);
+          }
+          setState(() {
+            _progressString = tr("Loading menu");
+          });
+          m = SocketMessage.dllplugin(SocketMessage.op_dish_menu);
+          sendSocketMessage(m);
+          break;
+        case SocketMessage.op_dish_menu:
+          NetworkTable nt = NetworkTable();
+          nt.readFromSocketMessage(m);
+          Db.delete("delete from dish_menu");
+          for (int i = 0; i < nt.rowCount; i++) {
+            Db.insert("insert into dish_menu (id, menuid, typeid, dishid, price, storeid, print1, print2) values (?,?,?,?,?,?,?,?)",
+                [i + 1, nt.getRawData(i, 0), nt.getRawData(i, 1), nt.getRawData(i, 2), nt.getRawData(i, 3), nt.getRawData(i, 4), nt.getRawData(i, 5), nt.getRawData(i, 6)]);
           }
           setState(() {
             _progressString = tr("Loading car models");
           });
-          m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllop);
-          m.addString("waiterclient");
-          m.addInt(SocketMessage.op_car_model);
-          m.addString(Config.getString(key_database_name));
-          m.addByte(3);
+          m = SocketMessage.dllplugin(SocketMessage.op_car_model);
           sendSocketMessage(m);
           break;
         case SocketMessage.op_login_pashhash:
@@ -174,11 +177,7 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
             _startWithoutDataLoad();
             return;
           }
-          m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllop);
-          m.addString("waiterclient");
-          m.addInt(SocketMessage.op_get_hall_list);
-          m.addString(Config.getString(key_database_name));
-          m.addByte(3);
+          m = SocketMessage.dllplugin(SocketMessage.op_get_hall_list);
           sendSocketMessage(m);
           setState(() {
             _progressString = tr("Loading list of halls");
@@ -190,15 +189,11 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
           Db.delete("delete from car_model");
           ClassCarModel.carModels.clear();
           for (int i = 0; i < nt.rowCount; i++) {
-            Db.insert("insert into car_model (id, name) values (?,?)", [
-              nt.getRawData(i, 0), nt.getRawData(i, 1)
-            ]);
-            ClassCarModel cm = ClassCarModel(id: nt.getRawData(i, 0), name: nt.getRawData(i, 1));
-            ClassCarModel.carModels.add(cm);
+            Db.insert("insert into car_model (id, name) values (?,?)", [nt.getRawData(i, 0), nt.getRawData(i, 1)]);
           }
 
           Config.setBool(key_data_dont_update, true);
-          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (BuildContext context) => WidgetHalls()), (route) => false);
+          _startWithoutDataLoad();
           break;
       }
     }
@@ -321,22 +316,65 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
       _dataLoading = true;
       _progressString = "";
     });
-    SocketMessage m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllplugin);
-    m.addString(SocketMessage.waiterclientp);
-    m.addInt(SocketMessage.op_login);
-    m.addByte(3);
+    SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_login);
     m.addString(_usernameController.text);
     m.addString(_passwordController.text);
     sendSocketMessage(m);
   }
 
   void _startWithoutDataLoad() async {
-    if (ClassCarModel.carModels.length == 0) {
+    if (ClassHall.list.isEmpty) {
+      await Db.query("halls").then((map) {
+        List.generate(map.length, (i) {
+          ClassHall ch = ClassHall(id: map[i]["id"], name: map[i]["name"], menu: map[i]["menuid"], servicevalue: map[i]["servicevalue"]);
+          ClassHall.list.add(ch);
+        });
+     });
+    }
+    if (ClassTable.list.isEmpty) {
+      Db.query("tables", orderBy: "q").then((map) {
+        List.generate(map.length, (i) {
+          ClassTable ct = ClassTable(id: map[i]["id"], name: map[i]["name"], stateid: map[i]["state"], hallid: map[i]["hall"]);
+          ClassTable.list.add(ct);
+        });
+        setState(() {});
+      });
+    }
+    if (ClassCarModel.carModels.isEmpty) {
       await Db.query("car_model").then((map) {
         List.generate(map.length, (i) {
           ClassCarModel cm = ClassCarModel(id: map[i]["id"], name: map[i]["name"]);
           ClassCarModel.carModels.add(cm);
         });
+      });
+    }
+    if (ClassDishPart2.list.isEmpty) {
+      await Db.query("dish_part2", orderBy: "q").then((map) {
+        List.generate(map.length, (i) {
+          ClassDishPart2 cd = ClassDishPart2(map[i]["id"], map[i]["parentid"], map[i]["part1"], map[i]["name"]);
+          cd.bgColor = Color(map[i]["bgcolor"]);
+          cd.textColor = Color(map[i]["textcolor"]);
+          ClassDishPart2.list.add(cd);
+        });
+      });
+    }
+    if (ClassDish.map.isEmpty) {
+      await Db.query("dish").then((map) {
+        List.generate(map.length, (i){
+          ClassDish cd = ClassDish(map[i]["id"], map[i]["part2"], map[i]["name"]);
+          cd.bgColor = Color(map[i]["bgcolor"]);
+          cd.textColor = Color(map[i]["textcolor"]);
+          ClassDish.map[cd.id] = cd;
+        });
+      });
+    }
+    if (ClassMenuDish.list.isEmpty) {
+      await Db.query("dish_menu", orderBy: "id").then((map) {
+        List.generate(map.length, (i) {
+          ClassMenuDish cm = ClassMenuDish(map[i]["menuid"], map[i]["typeid"], map[i]["dishid"], map[i]["price"], map[i]["print1"], map[i]["print2"], map[i]["storeid"]);
+          ClassMenuDish.list.add(cm);
+        });
+        ClassMenuDish.buildPart2();
       });
     }
     Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (BuildContext context) => WidgetHalls()), (route) => false);
