@@ -1,4 +1,3 @@
-import 'package:cafe5_waiter_mobile_client/widget_bottom_menu.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:cafe5_waiter_mobile_client/base_widget.dart';
 import 'package:flutter/material.dart';
@@ -52,7 +51,6 @@ class WidgetHallsState extends BaseWidgetState<WidgetHalls> {
                     });
                   },
                 ))),
-        Align(alignment: Alignment.bottomCenter, child: Padding(padding: EdgeInsets.only(bottom: 5), child: bottomMenu()))
       ],
     )));
   }

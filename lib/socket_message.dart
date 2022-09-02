@@ -113,17 +113,17 @@ class SocketMessage {
   }
 
   void addString(String value) {
-    addInt(value.length + 1);
-    buffer.add(value.codeUnits);
+    List<int> b = utf8.encode(value);
+    addInt(b.length + 1);
+    buffer.add(b);
     buffer.addByte(0);
-    _dataSize += value.length + 1;
+    _dataSize += b.length + 1;
   }
 
   String getString() {
     int sz = getInt();
     String str = utf8.decode(buffer.toBytes().sublist(_dataPosition, _dataPosition + sz - 1));
     _dataPosition += sz;
-    print(str);
     return str;
   }
 

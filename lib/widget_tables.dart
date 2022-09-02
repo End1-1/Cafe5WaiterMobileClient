@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import 'package:cafe5_waiter_mobile_client/home_page.dart';
 import 'package:cafe5_waiter_mobile_client/network_table.dart';
 import 'package:cafe5_waiter_mobile_client/socket_message.dart';
-import 'package:cafe5_waiter_mobile_client/widget_bottom_menu.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:cafe5_waiter_mobile_client/base_widget.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +13,7 @@ import 'package:cafe5_waiter_mobile_client/db.dart';
 import 'package:cafe5_waiter_mobile_client/class_table.dart';
 import 'package:cafe5_waiter_mobile_client/widget_orderwindow.dart';
 import 'package:cafe5_waiter_mobile_client/widget_halls.dart';
+import 'package:sqflite/sqlite_api.dart';
 
 class WidgetTables extends StatefulWidget {
   int hall;
@@ -51,18 +51,23 @@ class WidgetTablesState extends BaseWidgetState<WidgetTables> {
         case SocketMessage.op_get_table_list:
           NetworkTable nt = NetworkTable();
           nt.readFromSocketMessage(m);
-          for (int i = 0; i < nt.rowCount; i++) {
-            Db.update("tables", {"state":nt.getRawData(i, 2), "orderid": nt.getRawData(i, 3)}, where: "id=?", whereArgs: [nt.getRawData(i, 0)]);
-          }
-          setState(() {
-            ClassTable.list.clear();
-              Db.query("tables", orderBy: "q").then((map) {
-                List.generate(map.length, (i) {
-                  ClassTable ct = ClassTable(id: map[i]["id"], name: map[i]["name"], stateid: map[i]["state"], hallid: map[i]["hall"]);
-                  ClassTable.list.add(ct);
-                });
-                setState(() {});
+          await Db.db!.transaction((txn) async {
+            Batch b = txn.batch();
+            for (int i = 0; i < nt.rowCount; i++) {
+              b.update("tables", {"state": nt.getRawData(i, 2), "orderid": nt.getRawData(i, 3)}, where: "id=?", whereArgs: [nt.getRawData(i, 0)]);
+            }
+            await b.commit();
+          });
+
+          await Db.query("tables", orderBy: "q").then((map) {
+            setState(() {
+              ClassTable.list.clear();
+              List.generate(map.length, (i) {
+                ClassTable ct = ClassTable(id: map[i]["id"], name: map[i]["name"], stateid: map[i]["state"], hallid: map[i]["hall"]);
+                ClassTable.list.add(ct);
               });
+              print("after load ${ClassTable.list.length}");
+            });
           });
           break;
       }
@@ -77,7 +82,6 @@ class WidgetTablesState extends BaseWidgetState<WidgetTables> {
         SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_get_table_list);
         sendSocketMessage(m);
       });
-
     });
   }
 
@@ -152,6 +156,7 @@ class WidgetTablesState extends BaseWidgetState<WidgetTables> {
     List<DataRow> rows = [];
     List<DataCell> cells = [];
     int column = 0;
+    print("in data ${ClassTable.list.length}");
     for (int i = 0; i < ClassTable.list.length; i++) {
       final ClassTable t = ClassTable.list.elementAt(i);
       if (t.hallid != widget.hall) {
@@ -164,7 +169,7 @@ class WidgetTablesState extends BaseWidgetState<WidgetTables> {
           height: columnWidth,
           child: OutlinedButton(
             onPressed: () {
-              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (BuildContext context) => WidgetOrderWindow(table: t)), (route) => false);
+              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (BuildContext context) => WidgetOrderWindow(table: t)), (route) => true);
             },
             child: Text(t.name),
           )));
@@ -250,38 +255,16 @@ class WidgetTablesState extends BaseWidgetState<WidgetTables> {
                       width: MediaQuery.of(context).size.width - (MediaQuery.of(context).size.width / 3),
                       child: Container(
                         color: Color(0XffDDEEAA),
-                          child: Column(
+                        child: Column(
+                          children: [
+                            Container(
+                              height: 5,
+                            ),
+                            Row(
                               children: [
+                                Expanded(child: Container()),
                                 Container(
-                                  height: 5,
-                                ),
-                                Row(
-                                  children: [
-                                    Expanded(child: Container()),
-                                    Container(
-                                        width: 36,
-                                        height: 36,
-                                        margin: EdgeInsets.only(left: 5, right: 5),
-                                        child: OutlinedButton(
-                                            style: OutlinedButton.styleFrom(
-                                              padding: EdgeInsets.all(2),
-                                            ),
-                                            onPressed: () {
-                                              setState(() {
-                                                _hideMenu = true;
-                                              });
-                                            },
-                                            child: Image.asset("images/cancel.png", width: 36, height: 36)))
-                                  ],
-                                ),
-                                CheckboxListTile(
-                                    title: Text(tr("Update data")),
-                                    value: !Config.getBool(key_data_dont_update),
-                                    onChanged: (v) {
-                                      setState(() {
-                                        Config.setBool(key_data_dont_update, !v!);
-                                      });
-                                    }),Container(
+                                    width: 36,
                                     height: 36,
                                     margin: EdgeInsets.only(left: 5, right: 5),
                                     child: OutlinedButton(
@@ -290,20 +273,39 @@ class WidgetTablesState extends BaseWidgetState<WidgetTables> {
                                         ),
                                         onPressed: () {
                                           setState(() {
-                                            sq(tr("Confirm to logout"), () {
-                                              Config.setString(key_session_id, "");
-                                              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (BuildContext context) => WidgetHome()), (route) => false);
-                                            }, (){});
+                                            _hideMenu = true;
                                           });
                                         },
-                                        child: Row(
-                                            children: [
-                                              Image.asset("images/lock.png", width: 36, height: 36),
-                                              Text(tr("Logout"))
-                                            ]))),
-                                Expanded(child: Container())
+                                        child: Image.asset("images/cancel.png", width: 36, height: 36)))
                               ],
                             ),
+                            CheckboxListTile(
+                                title: Text(tr("Update data")),
+                                value: !Config.getBool(key_data_dont_update),
+                                onChanged: (v) {
+                                  setState(() {
+                                    Config.setBool(key_data_dont_update, !v!);
+                                  });
+                                }),
+                            Container(
+                                height: 36,
+                                margin: EdgeInsets.only(left: 5, right: 5),
+                                child: OutlinedButton(
+                                    style: OutlinedButton.styleFrom(
+                                      padding: EdgeInsets.all(2),
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        sq(tr("Confirm to logout"), () {
+                                          Config.setString(key_session_id, "");
+                                          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (BuildContext context) => WidgetHome()), (route) => false);
+                                        }, () {});
+                                      });
+                                    },
+                                    child: Row(children: [Image.asset("images/lock.png", width: 36, height: 36), Text(tr("Logout"))]))),
+                            Expanded(child: Container())
+                          ],
+                        ),
                       ))
                 ],
               )),

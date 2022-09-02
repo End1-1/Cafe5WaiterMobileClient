@@ -2,10 +2,10 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 class Db {
-  static Database? _db;
+  static Database? db;
 
   static init(List<String> createList) {
-    if (_db == null) {
+    if (db == null) {
       getDatabasesPath().then((value) {
         openDatabase(join(value, 'tasks.db'), onCreate: (db, version) {
           for (String s in createList) {
@@ -24,29 +24,29 @@ class Db {
             db.execute(s);
           }
         }, version: 30)
-            .then((value) => _db = value);
+            .then((value) => db = value);
       });
     }
   }
 
   static void delete(String sql, [List<Object?>? args]) async {
-    await _db!.rawDelete(sql, args);
+    await db!.rawDelete(sql, args);
   }
 
   static Future<int> insert(String sql, [List<Object?>? args]) async {
-    int result = await _db!.rawInsert(sql, args);
+    int result = await db!.rawInsert(sql, args);
     return result;
   }
 
   static Future<List<Map<String, dynamic?>>> query(String table, {String? orderBy,}) async {
-    return await _db!.query(table, orderBy: orderBy);
+    return await db!.query(table, orderBy: orderBy);
   }
 
   static Future<int> update(String table, Map<String, Object?> values,  {String? where,  List<Object?>? whereArgs,}) async {
-    return await _db!.update(table, values, where: where, whereArgs: whereArgs);
+    return await db!.update(table, values, where: where, whereArgs: whereArgs);
   }
 
   static Future<List<Map<String, dynamic?>>> rawQuery(String sql) async {
-    return await _db!.rawQuery(sql);
+    return await db!.rawQuery(sql);
   }
 }

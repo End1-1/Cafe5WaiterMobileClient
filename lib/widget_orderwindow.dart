@@ -20,6 +20,7 @@ import 'package:cafe5_waiter_mobile_client/db.dart';
 import 'package:cafe5_waiter_mobile_client/class_table.dart';
 import 'package:cafe5_waiter_mobile_client/class_car_model.dart';
 import 'package:cafe5_waiter_mobile_client/widget_tables.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class WidgetOrderWindow extends StatefulWidget {
   ClassTable table;
@@ -118,8 +119,8 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
           });
           break;
         case SocketMessage.op_add_dish_to_order:
-          ClassOrderDish co = ClassOrderDish(m.getString(), m.getInt(), m.getDouble(), m.getDouble(), m.getDouble(), m.getDouble(), m.getInt(), m.getString(), m.getString(), "");
           setState(() {
+            ClassOrderDish co = ClassOrderDish(m.getString(), m.getInt(), m.getDouble(), m.getDouble(), m.getDouble(), m.getDouble(), m.getInt(), m.getString(), m.getString(), "");
             _orderDishes.add(co);
             _orderScrollController.jumpTo(_orderScrollController.position.maxScrollExtent);
           });
@@ -172,6 +173,11 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
         body: SafeArea(
@@ -211,7 +217,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                   },
                   child: Image.asset("images/menu.png", width: 36, height: 36))),
         ]),
-        Row(
+                  Visibility(visible: Config.getInt(key_protocol_version) == 3, child: Row(
           children: [
             Expanded(
                 child: Container(
@@ -222,95 +228,105 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                           padding: EdgeInsets.only(left: 5),
                         ),
                         onPressed: () async {
-                          final result = await Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => WidgetSetCar(table: widget.table)));
-                          if (result == null) {
-                            return;
-                          }
-                          setState(() {
-                            widget.table = result;
+                          Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => WidgetSetCar(table: widget.table))).then((result) {
+                            if (result == null) {
+                              return;
+                            }
+                            setState(() {
+                              widget.table = result;
+                            });
                           });
                         },
                         child: Row(children: [
                           Image.asset("images/car.png"),
                           Expanded(child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: Container(margin: EdgeInsets.only(left: 5), child: Text(_getCarTitle())))),
                         ])))),
-          ],
+            ClassOutlinedButton.createImage((){
+              if (widget.table.customer != null) {
+                launchUrl(Uri(scheme: "tel", path:"${widget.table.customer!.phone}"));
+              }
+            }, "images/call.png")
+          ]),
         ),
         Expanded(child: _orderDishesTable()),
         Container(
-          padding: EdgeInsets.only(left: 10, top: 5, bottom: 5,) ,
+            padding: EdgeInsets.only(
+              left: 10,
+              top: 5,
+              bottom: 5,
+            ),
             child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            ClassOutlinedButton.createImage(() {
-              if (_selectedOrderDishIndex < 0) {
-                return;
-              }
-              final ClassOrderDish co = _orderDishes.elementAt(_selectedOrderDishIndex);
-              if (co.qtyprint > 0) {
-                SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_add_dish_to_order);
-                m.addString(widget.table.orderid!);
-                m.addInt(co.dishid);
-                m.addDouble(co.price);
-                m.addInt(co.storeid);
-                m.addString(co.print1);
-                m.addString(co.print2);
-                sendSocketMessage(m);
-                return;
-              }
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                ClassOutlinedButton.createImage(() {
+                  if (_selectedOrderDishIndex < 0) {
+                    return;
+                  }
+                  final ClassOrderDish co = _orderDishes.elementAt(_selectedOrderDishIndex);
+                  if (co.qtyprint > 0) {
+                    SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_add_dish_to_order);
+                    m.addString(widget.table.orderid!);
+                    m.addInt(co.dishid);
+                    m.addDouble(co.price);
+                    m.addInt(co.storeid);
+                    m.addString(co.print1);
+                    m.addString(co.print2);
+                    sendSocketMessage(m);
+                    return;
+                  }
 
-              SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_modify_order_dish);
-              m.addString(co.id);
-              m.addDouble(co.qty + 1);
-              m.addString(co.comment);
-              sendSocketMessage(m);
-
-            }, "images/plus.png", h: 48, w: 48),
-            ClassOutlinedButton.createImage(() {
-              if (_selectedOrderDishIndex < 0) {
-                return;
-              }
-              final ClassOrderDish co = _orderDishes.elementAt(_selectedOrderDishIndex);
-              if (co.qty <= 1 && co.qtyprint < 0.01) {
-                SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_remove_dish_from_order);
-                m.addString(co.id);
-                sendSocketMessage(m);
-                return;
-              }
-              if (co.qty > 1 && co.qtyprint < 0.01) {
-                SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_modify_order_dish);
-                m.addString(co.id);
-                m.addDouble(co.qty - 1);
-                m.addString(co.comment);
-                sendSocketMessage(m);
-              }
-            }, "images/minus.png", h: 48, w: 48),
-            ClassOutlinedButton.createImage(() {
-              if (widget.table.orderid == null || widget.table.orderid!.isEmpty) {
-                return;
-              }
-              bool found = false;
-              for (ClassOrderDish co in _orderDishes) {
-                if (co.qtyprint < 0.01) {
-                  found = true;
-                  break;
-                }
-              }
-              if (found) {
-                sq(tr("Print order"), (){
-                  SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_print_service);
-                  m.addString(widget.table.orderid!);
+                  SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_modify_order_dish);
+                  m.addString(co.id);
+                  m.addDouble(co.qty + 1);
+                  m.addString(co.comment);
                   sendSocketMessage(m);
-                }, (){
-
-              });
-              }
-            }, "images/printer.png", h: 48, w: 48),
-            Expanded(child: Container(color: Colors.green,))
-          ],
-        ))
+                }, "images/plus.png", h: 48, w: 48),
+                ClassOutlinedButton.createImage(() {
+                  if (_selectedOrderDishIndex < 0) {
+                    return;
+                  }
+                  final ClassOrderDish co = _orderDishes.elementAt(_selectedOrderDishIndex);
+                  if (co.qty <= 1 && co.qtyprint < 0.01) {
+                    SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_remove_dish_from_order);
+                    m.addString(co.id);
+                    sendSocketMessage(m);
+                    return;
+                  }
+                  if (co.qty > 1 && co.qtyprint < 0.01) {
+                    SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_modify_order_dish);
+                    m.addString(co.id);
+                    m.addDouble(co.qty - 1);
+                    m.addString(co.comment);
+                    sendSocketMessage(m);
+                  }
+                }, "images/minus.png", h: 48, w: 48),
+                ClassOutlinedButton.createImage(() {
+                  if (widget.table.orderid == null || widget.table.orderid!.isEmpty) {
+                    return;
+                  }
+                  bool found = false;
+                  for (ClassOrderDish co in _orderDishes) {
+                    if (co.qtyprint < 0.01) {
+                      found = true;
+                      break;
+                    }
+                  }
+                  if (found) {
+                    sq(tr("Print order"), () {
+                      SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_print_service);
+                      m.addString(widget.table.orderid!);
+                      sendSocketMessage(m);
+                    }, () {});
+                  }
+                }, "images/printer.png", h: 48, w: 48),
+                Expanded(
+                    child: Container(
+                  color: Colors.green,
+                ))
+              ],
+            ))
       ]),
       _orderMenu()
     ])));
@@ -435,7 +451,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                             Container(
                               height: 2,
                             ),
-                            _menuBody(),
+                            Expanded(child: _menuBody()),
                           ],
                         )),
                   )
@@ -473,12 +489,24 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
               width: _menuWidth / colCount,
               child: Align(
                   alignment: Alignment.center,
-                  child: Text(cd.name,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: cd.textColor,
-                        fontSize: 12,
-                      )))), onTap: () {
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                    Expanded(
+                        child: Text(cd.name,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: cd.textColor,
+                              fontSize: 12,
+                            ))),
+                    Container(width: double.infinity, height: 20, decoration: BoxDecoration(border: Border.all(color: Colors.blueAccent), color: Colors.white), child: Text(textAlign: TextAlign.center, "${md.price}"))
+                  ]))), onTap: () {
+        if (widget.table.orderid == null || widget.table.orderid!.isEmpty) {
+          sd(tr("Set the car first"));
+          return;
+        }
         SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_add_dish_to_order);
         m.addString(widget.table.orderid!);
         m.addInt(cd.id);
@@ -503,7 +531,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
       rows.add(DataRow(cells: cells));
     }
 
-    return SingleChildScrollView(child: DataTable(horizontalMargin: 2, headingRowHeight: 0, dataRowHeight: 60, columnSpacing: 2, columns: columns, rows: rows));
+    return SingleChildScrollView(child: DataTable(horizontalMargin: 2, headingRowHeight: 0, dataRowHeight: 95, columnSpacing: 2, columns: columns, rows: rows));
   }
 
   Widget _part2(int level) {

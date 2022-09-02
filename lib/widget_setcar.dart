@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:cafe5_waiter_mobile_client/class_outlinedbutton.dart';
 import 'package:cafe5_waiter_mobile_client/socket_message.dart';
 import 'package:cafe5_waiter_mobile_client/widget_tables.dart';
 import 'package:flutter/cupertino.dart';
@@ -30,7 +31,7 @@ class WidgetSetCarState extends BaseWidgetState<WidgetSetCar> {
   ClassCustomer? _customer;
   TextEditingController _carNameController = TextEditingController();
   TextEditingController _plateController = TextEditingController();
-  TextEditingController _customerController = TextEditingController();
+  TextEditingController _customerNameController = TextEditingController();
   TextEditingController _customerPhoneController = TextEditingController();
   FocusNode _carNameFocusNode = FocusNode();
   GlobalKey _carNameKey = GlobalKey();
@@ -60,7 +61,7 @@ class WidgetSetCarState extends BaseWidgetState<WidgetSetCar> {
           _customer = ClassCustomer(id: m.getInt(), name: m.getString(), phone: m.getString());
           widget.table.car = _carModel;
           widget.table.customer = _customer;
-          Navigator.pop(context, widget.table);
+          Navigator.of(context).pop(widget.table);
           break;
         }
     }
@@ -78,7 +79,7 @@ class WidgetSetCarState extends BaseWidgetState<WidgetSetCar> {
         }
         if (widget.table.customer != null) {
           _customer = widget.table.customer;
-          _customerController.text = _customer!.name;
+          _customerNameController.text = _customer!.name;
           _customerPhoneController.text = _customer!.phone;
         }
       });
@@ -217,8 +218,13 @@ class WidgetSetCarState extends BaseWidgetState<WidgetSetCar> {
         children: [
           Expanded(
               child: TextFormField(
-            controller: _customerController,
+            controller: _customerNameController,
           )),
+          ClassOutlinedButton.createImage((){
+            setState(() {
+              _customerNameController.text = tr("Unknown");
+            });
+          }, "images/question.png"),
           SizedBox(
               width: 36,
               height: 36,
@@ -227,7 +233,7 @@ class WidgetSetCarState extends BaseWidgetState<WidgetSetCar> {
                     padding: const EdgeInsets.all(0),
                   ),
                   onPressed: () {
-                    _customerController.clear();
+                    _customerNameController.clear();
                   },
                   child: Image.asset("images/cancel.png")))
         ],
@@ -274,7 +280,7 @@ class WidgetSetCarState extends BaseWidgetState<WidgetSetCar> {
   }
 
   void _setCustomer(int id, String name, String phone) {
-    _customerController.text = name;
+    _customerNameController.text = name;
     _customerPhoneController.text = phone;
     _customer = ClassCustomer(id: id, name: name, phone: phone);
   }
@@ -292,7 +298,7 @@ class WidgetSetCarState extends BaseWidgetState<WidgetSetCar> {
       sd(tr("Select car model"));
       return;
     }
-    if (_customerController.text.isEmpty) {
+    if (_customerNameController.text.isEmpty) {
       sd(tr("Enter the customer name"));
       return;
     }
@@ -306,16 +312,13 @@ class WidgetSetCarState extends BaseWidgetState<WidgetSetCar> {
   }
 
   void _setCarUploadInfo() {
-    print("CUstomer name ${_customerController.text}");
-    SocketMessage m = SocketMessage(messageId: SocketMessage.messageNumber(), command: SocketMessage.c_dllplugin);
-    m.addString(SocketMessage.waiterclientp);
-    m.addInt(SocketMessage.op_set_car);
-    m.addByte(3);
+    print("CUstomer name ${_customerNameController.text}");
+    SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_set_car);
     m.addInt(widget.table.id);
     m.addInt(_carModel!.id);
     m.addString(_plateController.text);
     m.addInt(_customer == null ? 0 : _customer!.id);
-    m.addString(_customerController.text);
+    m.addString(_customerNameController.text);
     m.addString(_customerPhoneController.text);
     sendSocketMessage(m);
   }

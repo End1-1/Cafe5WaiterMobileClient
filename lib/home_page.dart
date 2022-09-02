@@ -16,6 +16,7 @@ import 'package:cafe5_waiter_mobile_client/socket_message.dart';
 import 'package:cafe5_waiter_mobile_client/translator.dart';
 import 'package:cafe5_waiter_mobile_client/widget_halls.dart';
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
 
 class WidgetHome extends StatefulWidget {
   WidgetHome() {
@@ -37,7 +38,6 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
 
   @override
   void initState() {
-    Config.setInt(key_protocol_version, 3);
     animationController = AnimationController(
       vsync: this,
       duration: Duration(seconds: 1),
@@ -107,10 +107,15 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
         case SocketMessage.op_get_table_list:
           NetworkTable nt = NetworkTable();
           nt.readFromSocketMessage(m);
-          Db.delete("delete from tables");
-          for (int i = 0; i < nt.rowCount; i++) {
-            Db.insert("insert into tables (id, hall, state, name, orderid, q) values (?,?,?,?,?,?)", [nt.getRawData(i, 0), nt.getRawData(i, 1), nt.getRawData(i, 2), nt.getRawData(i, 3), nt.getRawData(i, 4), i]);
-          }
+          await Db.db!.transaction((txn) async {
+            Batch b = txn.batch();
+            b.delete("tables");
+            for (int i = 0; i < nt.rowCount; i++) {
+              b.insert("tables", {'id': nt.getRawData(i, 0), 'hall': nt.getRawData(i, 1), 'state': nt.getRawData(i, 2), 'name': nt.getRawData(i, 3), 'orderid': nt.getRawData(i, 4), 'q': i});
+            }
+            await b.commit();
+          });
+
           setState(() {
             _progressString = tr("Loading list of dish part 1");
           });
@@ -133,11 +138,15 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
         case SocketMessage.op_get_dish_part2_list:
           NetworkTable nt = NetworkTable();
           nt.readFromSocketMessage(m);
-          Db.delete("delete from dish_part2");
-          for (int i = 0; i < nt.rowCount; i++) {
-            Db.insert("insert into dish_part2 (id, parentid, part1, textcolor, bgcolor, name, q) values (?,?,?,?,?,?,?)",
-                [nt.getRawData(i, 0), nt.getRawData(i, 1), nt.getRawData(i, 2), nt.getRawData(i, 3), nt.getRawData(i, 4), nt.getRawData(i, 5), nt.getRawData(i, 6)]);
-          }
+          await Db.db!.transaction((txn) async {
+            Batch b = txn.batch();
+            b.delete("dish_part2");
+            for (int i = 0; i < nt.rowCount; i++) {
+              b.insert("dish_part2", {'id': nt.getRawData(i, 0), 'parentid': nt.getRawData(i, 1), 'part1': nt.getRawData(i, 2), 'textcolor': nt.getRawData(i, 3), 'bgcolor': nt.getRawData(i, 4), 'name': nt.getRawData(i, 5), 'q': nt.getRawData(i, 6)});
+            }
+            await b.commit();
+          });
+
           setState(() {
             _progressString = tr("Loading dishes");
           });
@@ -147,11 +156,14 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
         case SocketMessage.op_get_dish_dish_list:
           NetworkTable nt = NetworkTable();
           nt.readFromSocketMessage(m);
-          Db.delete("delete from dish");
-          for (int i = 0; i < nt.rowCount; i++) {
-            Db.insert("insert into dish (id, part2, bgcolor, textcolor, name, q) values (?,?,?,?,?,?)",
-                [nt.getRawData(i, 0), nt.getRawData(i, 1), nt.getRawData(i, 2), nt.getRawData(i, 3), nt.getRawData(i, 4), nt.getRawData(i, 5)]);
-          }
+          await Db.db!.transaction((txn) async {
+            Batch b = txn.batch();
+            b.delete("dish");
+            for (int i = 0; i < nt.rowCount; i++) {
+              b.insert("dish", {'id': nt.getRawData(i, 0), 'part2': nt.getRawData(i, 1), 'bgcolor': nt.getRawData(i, 2), 'textcolor': nt.getRawData(i, 3), 'name': nt.getRawData(i, 4), 'q': nt.getRawData(i, 5)});
+            }
+            b.commit();
+          });
           setState(() {
             _progressString = tr("Loading menu");
           });
@@ -161,11 +173,14 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
         case SocketMessage.op_dish_menu:
           NetworkTable nt = NetworkTable();
           nt.readFromSocketMessage(m);
-          Db.delete("delete from dish_menu");
-          for (int i = 0; i < nt.rowCount; i++) {
-            Db.insert("insert into dish_menu (id, menuid, typeid, dishid, price, storeid, print1, print2) values (?,?,?,?,?,?,?,?)",
-                [i + 1, nt.getRawData(i, 0), nt.getRawData(i, 1), nt.getRawData(i, 2), nt.getRawData(i, 3), nt.getRawData(i, 4), nt.getRawData(i, 5), nt.getRawData(i, 6)]);
-          }
+          await Db.db!.transaction((txn) async {
+            Batch b = txn.batch();
+            b.delete("dish_menu");
+            for (int i = 0; i < nt.rowCount; i++) {
+              b.insert("dish_menu", {'id': i + 1, 'menuid': nt.getRawData(i, 0), 'typeid': nt.getRawData(i, 1), 'dishid': nt.getRawData(i, 2), 'price': nt.getRawData(i, 3), 'storeid': nt.getRawData(i, 4), 'print1': nt.getRawData(i, 5), 'print2': nt.getRawData(i, 6)});
+            }
+            await b.commit();
+          });
           setState(() {
             _progressString = tr("Loading car models");
           });
@@ -186,12 +201,14 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
         case SocketMessage.op_car_model:
           NetworkTable nt = NetworkTable();
           nt.readFromSocketMessage(m);
-          Db.delete("delete from car_model");
-          ClassCarModel.carModels.clear();
-          for (int i = 0; i < nt.rowCount; i++) {
-            Db.insert("insert into car_model (id, name) values (?,?)", [nt.getRawData(i, 0), nt.getRawData(i, 1)]);
-          }
-
+          await Db.db!.transaction((txn) async {
+            Batch b = txn.batch();
+            b.delete("car_model");
+            for (int i = 0; i < nt.rowCount; i++) {
+              b.insert("car_model", {'id': nt.getRawData(i, 0), 'name': nt.getRawData(i, 1)});
+            }
+            await b.commit();
+          });
           Config.setBool(key_data_dont_update, true);
           _startWithoutDataLoad();
           break;
@@ -323,60 +340,62 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
   }
 
   void _startWithoutDataLoad() async {
-    if (ClassHall.list.isEmpty) {
-      await Db.query("halls").then((map) {
-        List.generate(map.length, (i) {
-          ClassHall ch = ClassHall(id: map[i]["id"], name: map[i]["name"], menu: map[i]["menuid"], servicevalue: map[i]["servicevalue"]);
-          ClassHall.list.add(ch);
-        });
-     });
-    }
-    if (ClassTable.list.isEmpty) {
-      Db.query("tables", orderBy: "q").then((map) {
-        List.generate(map.length, (i) {
-          ClassTable ct = ClassTable(id: map[i]["id"], name: map[i]["name"], stateid: map[i]["state"], hallid: map[i]["hall"]);
-          ClassTable.list.add(ct);
-        });
-        setState(() {});
+    print(DateTime.now());
+
+    await Db.query("halls").then((map) {
+      ClassHall.list.clear();
+      List.generate(map.length, (i) {
+        ClassHall ch = ClassHall(id: map[i]["id"], name: map[i]["name"], menu: map[i]["menuid"], servicevalue: map[i]["servicevalue"]);
+        ClassHall.list.add(ch);
       });
-    }
-    if (ClassCarModel.carModels.isEmpty) {
-      await Db.query("car_model").then((map) {
-        List.generate(map.length, (i) {
-          ClassCarModel cm = ClassCarModel(id: map[i]["id"], name: map[i]["name"]);
-          ClassCarModel.carModels.add(cm);
-        });
+    });
+
+    await Db.query("tables", orderBy: "q").then((map) {
+      ClassTable.list.clear();
+      List.generate(map.length, (i) {
+        ClassTable ct = ClassTable(id: map[i]["id"], name: map[i]["name"], stateid: map[i]["state"], hallid: map[i]["hall"]);
+        ClassTable.list.add(ct);
       });
-    }
-    if (ClassDishPart2.list.isEmpty) {
-      await Db.query("dish_part2", orderBy: "q").then((map) {
-        List.generate(map.length, (i) {
-          ClassDishPart2 cd = ClassDishPart2(map[i]["id"], map[i]["parentid"], map[i]["part1"], map[i]["name"]);
-          cd.bgColor = Color(map[i]["bgcolor"]);
-          cd.textColor = Color(map[i]["textcolor"]);
-          ClassDishPart2.list.add(cd);
-        });
+    });
+
+    await Db.query("car_model").then((map) {
+      ClassCarModel.carModels.clear();
+      List.generate(map.length, (i) {
+        ClassCarModel cm = ClassCarModel(id: map[i]["id"], name: map[i]["name"]);
+        ClassCarModel.carModels.add(cm);
       });
-    }
-    if (ClassDish.map.isEmpty) {
-      await Db.query("dish").then((map) {
-        List.generate(map.length, (i){
-          ClassDish cd = ClassDish(map[i]["id"], map[i]["part2"], map[i]["name"]);
-          cd.bgColor = Color(map[i]["bgcolor"]);
-          cd.textColor = Color(map[i]["textcolor"]);
-          ClassDish.map[cd.id] = cd;
-        });
+    });
+
+    await Db.query("dish_part2", orderBy: "q").then((map) {
+      ClassDishPart2.list.clear();
+      List.generate(map.length, (i) {
+        ClassDishPart2 cd = ClassDishPart2(map[i]["id"], map[i]["parentid"], map[i]["part1"], map[i]["name"]);
+        cd.bgColor = Color(map[i]["bgcolor"]);
+        cd.textColor = Color(map[i]["textcolor"]);
+        ClassDishPart2.list.add(cd);
       });
-    }
-    if (ClassMenuDish.list.isEmpty) {
-      await Db.query("dish_menu", orderBy: "id").then((map) {
-        List.generate(map.length, (i) {
-          ClassMenuDish cm = ClassMenuDish(map[i]["menuid"], map[i]["typeid"], map[i]["dishid"], map[i]["price"], map[i]["print1"], map[i]["print2"], map[i]["storeid"]);
-          ClassMenuDish.list.add(cm);
-        });
-        ClassMenuDish.buildPart2();
+    });
+
+    await Db.query("dish").then((map) {
+      ClassDish.map.clear();
+      List.generate(map.length, (i) {
+        ClassDish cd = ClassDish(map[i]["id"], map[i]["part2"], map[i]["name"]);
+        cd.bgColor = Color(map[i]["bgcolor"]);
+        cd.textColor = Color(map[i]["textcolor"]);
+        ClassDish.map[cd.id] = cd;
       });
-    }
+    });
+
+    await Db.query("dish_menu", orderBy: "id").then((map) {
+      ClassMenuDish.list.clear();
+      List.generate(map.length, (i) {
+        ClassMenuDish cm = ClassMenuDish(map[i]["menuid"], map[i]["typeid"], map[i]["dishid"], map[i]["price"], map[i]["print1"], map[i]["print2"], map[i]["storeid"]);
+        ClassMenuDish.list.add(cm);
+      });
+      ClassMenuDish.buildPart2();
+    });
+
+    print(DateTime.now());
     Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (BuildContext context) => WidgetHalls()), (route) => false);
   }
 }
