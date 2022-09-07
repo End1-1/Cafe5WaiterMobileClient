@@ -22,7 +22,7 @@ List<String> dbCreate = [
   "create table dish_menu (id int, menuid int, typeid int, dishid int, price real, storeid int, print1 text, print2 text)"
 ];
 
-RegExp regex = RegExp(r'([.]*0)(?!.*\d)');
+final RegExp regex = RegExp(r'([.]*0)(?!.*\d)');
 String num(double x) {
   return x.toString().replaceAll(regex, "");
 }
