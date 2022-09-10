@@ -204,10 +204,10 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
           Container(
               width: 36,
               height: 36,
-              margin: EdgeInsets.only(left: 5, right: 5),
+              margin: const EdgeInsets.only(left: 5, right: 5),
               child: OutlinedButton(
                   style: OutlinedButton.styleFrom(
-                    padding: EdgeInsets.all(2),
+                    padding: const EdgeInsets.all(2),
                   ),
                   onPressed: () {
                     setState(() {
@@ -221,11 +221,11 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
           children: [
             Expanded(
                 child: Container(
-                    margin: EdgeInsets.only(left: 5, top: 2, right: 5),
+                    margin: const EdgeInsets.only(left: 5, top: 2, right: 5),
                     height: 36,
                     child: OutlinedButton(
                         style: OutlinedButton.styleFrom(
-                          padding: EdgeInsets.only(left: 5),
+                          padding: const EdgeInsets.only(left: 5),
                         ),
                         onPressed: () async {
                           Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => WidgetSetCar(table: widget.table))).then((result) {
@@ -239,7 +239,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                         },
                         child: Row(children: [
                           Image.asset("images/car.png"),
-                          Expanded(child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: Container(margin: EdgeInsets.only(left: 5), child: Text(_getCarTitle())))),
+                          Expanded(child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: Container(margin: const EdgeInsets.only(left: 5), child: Text(_getCarTitle())))),
                         ])))),
             ClassOutlinedButton.createImage((){
               if (widget.table.customer != null) {
@@ -250,7 +250,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
         ),
         Expanded(child: _orderDishesTable()),
         Container(
-            padding: EdgeInsets.only(
+            padding: const EdgeInsets.only(
               left: 10,
               top: 5,
               bottom: 5,
@@ -345,8 +345,8 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                   }),
               child: Container(
                   height: 50,
-                  color: index == _selectedOrderDishIndex ? Color(0xA5DADEFF) : (index % 2 == 0 ? Colors.white : Colors.black12),
-                  padding: EdgeInsets.only(top: 5, bottom: 5),
+                  color: index == _selectedOrderDishIndex ? const Color(0xA5DADEFF) : (index % 2 == 0 ? Colors.white : Colors.black12),
+                  padding: const EdgeInsets.only(top: 5, bottom: 5),
                   child: Row(
                     children: [
                       Container(
@@ -431,8 +431,8 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                     right: 0,
                     width: _menuWidth,
                     child: Container(
-                        padding: EdgeInsets.only(top: 5),
-                        color: Color(0XffDDEEAA),
+                        padding: const EdgeInsets.only(top: 5),
+                        color: const Color(0XffDDEEAA),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -463,13 +463,13 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
   Widget _dishes() {
     ClassHall? h = ClassHall.getHall(widget.table.hallid);
     if (h == null) {
-      return Text("Hall is null");
+      return const Text("Hall is null");
     }
 
     int colCount = 2;
     List<DataColumn> columns = [];
     for (int i = 0; i < colCount; i++) {
-      columns.add(DataColumn(label: Container(child: Text(""))));
+      columns.add(DataColumn(label: Container(child: const Text(""))));
     }
 
     List<DataRow> rows = [];
@@ -484,7 +484,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
 
       DataCell dc = DataCell(
           Container(
-              margin: EdgeInsets.only(top: 2),
+              margin: const EdgeInsets.only(top: 2),
               color: cd.bgColor,
               width: _menuWidth / colCount,
               child: Align(
@@ -526,7 +526,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
     }
     if (cells.length > 0) {
       while (cells.length < colCount) {
-        cells.add(DataCell(Text("")));
+        cells.add(const DataCell(Text("")));
       }
       rows.add(DataRow(cells: cells));
     }
@@ -537,13 +537,13 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
   Widget _part2(int level) {
     ClassHall? h = ClassHall.getHall(widget.table.hallid);
     if (h == null) {
-      return Text("Hall is null");
+      return const Text("Hall is null");
     }
 
     int colCount = 2;
     List<DataColumn> columns = [];
     for (int i = 0; i < colCount; i++) {
-      columns.add(DataColumn(label: Container(child: Text(""))));
+      columns.add(DataColumn(label: Container(child: const Text(""))));
     }
 
     List<DataRow> rows = [];
@@ -557,7 +557,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
       }
       DataCell dc = DataCell(
           Container(
-              margin: EdgeInsets.only(top: 2),
+              margin: const EdgeInsets.only(top: 2),
               color: d.bgColor,
               child: Align(
                   alignment: Alignment.center,
@@ -582,7 +582,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
     }
     if (cells.length > 0) {
       while (cells.length < colCount + 1) {
-        cells.add(DataCell(Text("")));
+        cells.add(const DataCell(Text("")));
       }
       rows.add(DataRow(cells: cells));
     }
@@ -593,12 +593,12 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
   Widget _menuBody() {
     switch (_menuType) {
       case 0:
-        return Text("0");
+        return const Text("0");
       case 1:
         return _part2(0);
       case 2:
         return _dishes();
     }
-    return Text("No menu type selected");
+    return const Text("No menu type selected");
   }
 }
