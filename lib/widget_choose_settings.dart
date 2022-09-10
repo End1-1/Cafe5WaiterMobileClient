@@ -1,8 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:cafe5_waiter_mobile_client/widget_read_qr.dart';
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter/material.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:cafe5_waiter_mobile_client/translator.dart';
 import 'package:cafe5_waiter_mobile_client/config.dart';
 import 'package:cafe5_waiter_mobile_client/base_widget.dart';
@@ -88,17 +87,9 @@ class WidgetChooseSettingsState extends BaseWidgetState<WidgetChooseSettings> {
               Align(
                 alignment: Alignment.center,
                 child: TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const WidgetReadQR()),
-                    ).then((result) {
-                      if (result == null) {
-                        return;
-                      }
-                      Barcode? bc = result as Barcode?;
-                      List<String> params = bc!.code!.split(";");
+                  onPressed: ()  {
+                    FlutterBarcodeScanner.scanBarcode('#ff6666', 'Cancel', true, ScanMode.QR).then((barcodeScanRes) {
+                      List<String> params = barcodeScanRes.split(";");
                       if (params.length == 6) {
                         Config.setString(key_server_address, params[0]);
                         Config.setString(key_server_port, params[1]);
@@ -108,8 +99,7 @@ class WidgetChooseSettingsState extends BaseWidgetState<WidgetChooseSettings> {
                         Config.setInt(key_protocol_version, int.tryParse(params[5])!);
                         ClientSocket.init(Config.getString(key_server_address), int.tryParse(Config.getString(key_server_port)) ?? 0);
                       }
-                    });
-                  },
+                    });},
                   child: Text(tr("Scan from QR code")),
                 ),
               ),

@@ -30,13 +30,13 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.2
-  qr_code_scanner: 1.0.0
   shared_preferences: 2.0.15
   path: ^1.8.1
   sqflite: ^2.0.3
   intl: ^0.17.0
   percent_indicator: ^4.2.2
   url_launcher: ^6.1.5
+  flutter_barcode_scanner: ^2.0.0
 
 dev_dependencies:
   flutter_test:
