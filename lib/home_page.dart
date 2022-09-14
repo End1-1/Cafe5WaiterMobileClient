@@ -40,7 +40,7 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
   void initState() {
     animationController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 1),
+      duration: const Duration(seconds: 1),
     )..addListener(() {
         setState(() {});
       });
@@ -229,20 +229,20 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
               child: Align(
                   alignment: Alignment.center,
                   child: Container(
-                      margin: EdgeInsets.only(top: 20, bottom: 20),
+                      margin: const EdgeInsets.only(top: 20, bottom: 20),
                       child: Text(
                         tr("Sign in"),
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                       )))),
           Align(
               alignment: Alignment.center,
               child: Container(
-                  margin: EdgeInsets.only(top: 5),
+                  margin: const EdgeInsets.only(top: 5),
                   width: 252,
                   decoration: BoxDecoration(border: Border.all(color: Colors.black38)),
                   child: Row(children: [
                     Container(
-                      padding: EdgeInsets.all(5),
+                      padding: const EdgeInsets.all(5),
                       child: Image.asset(
                         "images/user.png",
                         width: 40,
@@ -254,10 +254,10 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
                       width: 200,
                       child: TextFormField(
                         controller: _usernameController,
-                        style: TextStyle(fontSize: 20),
+                        style: const TextStyle(fontSize: 20),
                         decoration: InputDecoration(
                           hintText: tr("Username"),
-                          hintStyle: TextStyle(color: Colors.black12),
+                          hintStyle: const TextStyle(color: Colors.black12),
                           border: InputBorder.none,
                         ),
                       ),
@@ -266,12 +266,12 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
           Align(
               alignment: Alignment.center,
               child: Container(
-                  margin: EdgeInsets.only(top: 5),
+                  margin: const EdgeInsets.only(top: 5),
                   width: 252,
                   decoration: BoxDecoration(border: Border.all(color: Colors.black38)),
                   child: Row(children: [
                     Container(
-                      padding: EdgeInsets.all(5),
+                      padding: const EdgeInsets.all(5),
                       child: Image.asset(
                         "images/lock.png",
                         width: 40,
@@ -284,10 +284,10 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
                       child: TextFormField(
                         obscureText: true,
                         controller: _passwordController,
-                        style: TextStyle(fontSize: 20),
+                        style: const TextStyle(fontSize: 20),
                         decoration: InputDecoration(
                           hintText: tr("********"),
-                          hintStyle: TextStyle(color: Colors.black12),
+                          hintStyle: const TextStyle(color: Colors.black12),
                           border: InputBorder.none,
                         ),
                       ),
@@ -296,31 +296,31 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
           Align(
               alignment: Alignment.center,
               child: Container(
-                  margin: EdgeInsets.only(top: 5),
+                  margin: const EdgeInsets.only(top: 5),
                   width: 252,
                   height: 50,
                   child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
                         backgroundColor: Colors.blueGrey,
-                        side: BorderSide(
+                        side: const BorderSide(
                           width: 1.0,
                           color: Colors.black38,
                           style: BorderStyle.solid,
                         ),
                       ),
                       onPressed: _login,
-                      child: Text(tr("Login"), style: TextStyle(color: Colors.white))))),
+                      child: Text(tr("Login"), style: const TextStyle(color: Colors.white))))),
           Align(
               child: Container(
-                  margin: EdgeInsets.only(top: 5),
+                  margin: const EdgeInsets.only(top: 5),
                   child: Visibility(
                       visible: _dataLoading,
                       child: CircularProgressIndicator(
                         value: animationController.value,
                       )))),
           Align(
-            child: Container(margin: EdgeInsets.only(top: 5), child: Visibility(visible: _progressString.isNotEmpty, child: Text(_progressString))),
+            child: Container(margin: const EdgeInsets.only(top: 5), child: Visibility(visible: _progressString.isNotEmpty, child: Text(_progressString))),
           )
         ])));
   }

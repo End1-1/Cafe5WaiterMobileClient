@@ -170,11 +170,37 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
       m.addString(Config.getString(key_session_id));
       sendSocketMessage(m);
     });
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        print('app resumed');
+        break;
+
+      case AppLifecycleState.inactive:
+        print('app inactive');
+        break;
+
+      case AppLifecycleState.paused:
+        SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_unlock_table);
+        m.addInt(widget.table.id);
+        m.addString(Config.getString(key_session_id));
+        sendSocketMessage(m);
+        break;
+
+      case AppLifecycleState.detached:
+        print('app deatched');
+        break;
+    }
   }
 
   @override
