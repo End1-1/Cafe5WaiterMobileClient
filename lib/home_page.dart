@@ -7,6 +7,7 @@ import 'package:cafe5_waiter_mobile_client/class_dish.dart';
 import 'package:cafe5_waiter_mobile_client/class_dishpart2.dart';
 import 'package:cafe5_waiter_mobile_client/class_hall.dart';
 import 'package:cafe5_waiter_mobile_client/class_menudish.dart';
+import 'package:cafe5_waiter_mobile_client/class_outlinedbutton.dart';
 import 'package:cafe5_waiter_mobile_client/class_table.dart';
 import 'package:cafe5_waiter_mobile_client/config.dart';
 import 'package:cafe5_waiter_mobile_client/db.dart';
@@ -35,12 +36,13 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
   late AnimationController animationController;
   TextEditingController _usernameController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
+  TextEditingController _pinController = TextEditingController();
 
   @override
   void initState() {
     animationController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 1),
+      duration: const Duration(seconds: 1),
     )..addListener(() {
         setState(() {});
       });
@@ -229,20 +231,20 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
               child: Align(
                   alignment: Alignment.center,
                   child: Container(
-                      margin: EdgeInsets.only(top: 20, bottom: 20),
+                      margin: const EdgeInsets.only(top: 20, bottom: 20),
                       child: Text(
                         tr("Sign in"),
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                       )))),
           Align(
               alignment: Alignment.center,
               child: Container(
-                  margin: EdgeInsets.only(top: 5),
+                  margin: const EdgeInsets.only(top: 5),
                   width: 252,
                   decoration: BoxDecoration(border: Border.all(color: Colors.black38)),
                   child: Row(children: [
                     Container(
-                      padding: EdgeInsets.all(5),
+                      padding: const EdgeInsets.all(5),
                       child: Image.asset(
                         "images/user.png",
                         width: 40,
@@ -254,10 +256,10 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
                       width: 200,
                       child: TextFormField(
                         controller: _usernameController,
-                        style: TextStyle(fontSize: 20),
+                        style: const TextStyle(fontSize: 20),
                         decoration: InputDecoration(
                           hintText: tr("Username"),
-                          hintStyle: TextStyle(color: Colors.black12),
+                          hintStyle: const TextStyle(color: Colors.black12),
                           border: InputBorder.none,
                         ),
                       ),
@@ -266,12 +268,12 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
           Align(
               alignment: Alignment.center,
               child: Container(
-                  margin: EdgeInsets.only(top: 5),
+                  margin: const EdgeInsets.only(top: 5),
                   width: 252,
                   decoration: BoxDecoration(border: Border.all(color: Colors.black38)),
                   child: Row(children: [
                     Container(
-                      padding: EdgeInsets.all(5),
+                      padding: const EdgeInsets.all(5),
                       child: Image.asset(
                         "images/lock.png",
                         width: 40,
@@ -284,10 +286,10 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
                       child: TextFormField(
                         obscureText: true,
                         controller: _passwordController,
-                        style: TextStyle(fontSize: 20),
+                        style: const TextStyle(fontSize: 20),
                         decoration: InputDecoration(
                           hintText: tr("********"),
-                          hintStyle: TextStyle(color: Colors.black12),
+                          hintStyle: const TextStyle(color: Colors.black12),
                           border: InputBorder.none,
                         ),
                       ),
@@ -296,31 +298,67 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
           Align(
               alignment: Alignment.center,
               child: Container(
-                  margin: EdgeInsets.only(top: 5),
+                  margin: const EdgeInsets.only(top: 5),
                   width: 252,
                   height: 50,
                   child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
                         backgroundColor: Colors.blueGrey,
-                        side: BorderSide(
+                        side: const BorderSide(
                           width: 1.0,
                           color: Colors.black38,
                           style: BorderStyle.solid,
                         ),
                       ),
                       onPressed: _login,
-                      child: Text(tr("Login"), style: TextStyle(color: Colors.white))))),
+                      child: Text(tr("Login"), style: const TextStyle(color: Colors.white))))),
+          Align(
+            alignment: Alignment.center,
+            child: Container(margin: const EdgeInsets.all(5),
+                child: Column (
+              children: [
+                Container(margin: const EdgeInsets.all(5), child: Row(
+                  children: [
+                    ClassOutlinedButton.create((){_pin("7");}, "7", h: 72, w: 72),
+                    ClassOutlinedButton.create((){_pin("8");}, "8", h: 72, w: 72),
+                    ClassOutlinedButton.create((){_pin("9");}, "9", h: 72, w: 72),
+                  ],
+                )),
+                Container(margin: const EdgeInsets.all(5), child: Row(
+                  children: [
+                    ClassOutlinedButton.create((){_pin("4");}, "4", h: 72, w: 72),
+                    ClassOutlinedButton.create((){_pin("5");}, "5", h: 72, w: 72),
+                    ClassOutlinedButton.create((){_pin("6");}, "6", h: 72, w: 72),
+                  ],
+                )),
+                Container(margin: const EdgeInsets.all(5), child: Row(
+                  children: [
+                    ClassOutlinedButton.create((){_pin("1");}, "1", h: 72, w: 72),
+                    ClassOutlinedButton.create((){_pin("2");}, "2", h: 72, w: 72),
+                    ClassOutlinedButton.create((){_pin("3");}, "3", h: 72, w: 72),
+                  ],
+                )),
+                Container(margin: const EdgeInsets.all(5), child: Row(
+                  children: [
+                    ClassOutlinedButton.createImage((){_loginPin();}, "images/user.png", h: 72, w: 72),
+                    ClassOutlinedButton.create((){_pin("0");}, "0", h: 72, w: 72),
+                    ClassOutlinedButton.createImage((){}, "images/cancel.png", h: 72, w: 72),
+                  ],
+                ))
+              ],
+            ))
+          ),
           Align(
               child: Container(
-                  margin: EdgeInsets.only(top: 5),
+                  margin: const EdgeInsets.only(top: 5),
                   child: Visibility(
                       visible: _dataLoading,
                       child: CircularProgressIndicator(
                         value: animationController.value,
                       )))),
           Align(
-            child: Container(margin: EdgeInsets.only(top: 5), child: Visibility(visible: _progressString.isNotEmpty, child: Text(_progressString))),
+            child: Container(margin: const EdgeInsets.only(top: 5), child: Visibility(visible: _progressString.isNotEmpty, child: Text(_progressString))),
           )
         ])));
   }
@@ -337,6 +375,14 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
     m.addString(_usernameController.text);
     m.addString(_passwordController.text);
     sendSocketMessage(m);
+  }
+
+  void _loginPin() {
+
+  }
+
+  void _pin(String t) {
+    _pinController.text += t;
   }
 
   void _startWithoutDataLoad() async {

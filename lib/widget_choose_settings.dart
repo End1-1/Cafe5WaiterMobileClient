@@ -90,7 +90,7 @@ class WidgetChooseSettingsState extends BaseWidgetState<WidgetChooseSettings> {
                   onPressed: ()  {
                     FlutterBarcodeScanner.scanBarcode('#ff6666', 'Cancel', true, ScanMode.QR).then((barcodeScanRes) {
                       List<String> params = barcodeScanRes.split(";");
-                      if (params.length == 6) {
+                      if (params.length >= 6) {
                         Config.setString(key_server_address, params[0]);
                         Config.setString(key_server_port, params[1]);
                         Config.setString(key_server_username, params[2]);
