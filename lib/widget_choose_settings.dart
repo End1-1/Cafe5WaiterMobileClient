@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:cafe5_waiter_mobile_client/widget_manual_settings.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter/material.dart';
 import 'package:cafe5_waiter_mobile_client/translator.dart';
@@ -12,10 +13,6 @@ import 'client_socket.dart';
 
 class WidgetChooseSettings extends StatefulWidget {
 
-  WidgetChooseSettings() {
-    print("Create WidgetChooseSettings");
-  }
-
   @override
   State<StatefulWidget> createState() {
     return WidgetChooseSettingsState();
@@ -26,7 +23,7 @@ class WidgetChooseSettingsState extends BaseWidgetState<WidgetChooseSettings> {
 
   @override
   void handler(Uint8List data) {
-    SocketMessage m = new SocketMessage(messageId: 0, command: 0);
+    SocketMessage m = SocketMessage(messageId: 0, command: 0);
     m.setBuffer(data);
     if (!checkSocketMessage(m)) {
       return;
@@ -107,7 +104,7 @@ class WidgetChooseSettingsState extends BaseWidgetState<WidgetChooseSettings> {
                 alignment: Alignment.center,
                 child: TextButton(
                   onPressed: () {
-
+                    Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => WidgetManualSettings()));
                   },
                   child: Text(tr("Input manual")),
                 ),

@@ -84,6 +84,34 @@ class WidgetSetCarState extends BaseWidgetState<WidgetSetCar> {
         }
       });
     });
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        print('app resumed');
+        break;
+
+      case AppLifecycleState.inactive:
+        print('app inactive');
+        break;
+
+      case AppLifecycleState.paused:
+
+        break;
+
+      case AppLifecycleState.detached:
+        print('app deatched');
+        break;
+    }
   }
 
   @override
@@ -313,6 +341,7 @@ class WidgetSetCarState extends BaseWidgetState<WidgetSetCar> {
 
   void _setCarUploadInfo() {
     print("CUstomer name ${_customerNameController.text}");
+    _carModel!.licensePlate = _plateController.text;
     SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_set_car);
     m.addInt(widget.table.id);
     m.addInt(_carModel!.id);
