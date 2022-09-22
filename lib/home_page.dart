@@ -313,7 +313,6 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
                       ),
                       onPressed: _login,
                       child: Text(tr("Login"), style: const TextStyle(color: Colors.white))))),
-<<<<<<< HEAD
           Align(
             alignment: Alignment.center,
             child: Container(margin: const EdgeInsets.all(5),
@@ -350,8 +349,6 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
               ],
             ))
           ),
-=======
->>>>>>> 1865cdb3e99877935c2e916c15668e21e8e15f42
           Align(
               child: Container(
                   margin: const EdgeInsets.only(top: 5),
