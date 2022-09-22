@@ -32,6 +32,7 @@ class WidgetHome extends StatefulWidget {
 
 class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
   bool _dataLoading = false;
+  bool _showPin = false;
   String _progressString = "";
   late AnimationController animationController;
   TextEditingController _usernameController = TextEditingController();
@@ -227,16 +228,15 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-          Container(
-              child: Align(
-                  alignment: Alignment.center,
-                  child: Container(
-                      margin: const EdgeInsets.only(top: 20, bottom: 20),
-                      child: Text(
-                        tr("Sign in"),
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                      )))),
           Align(
+              alignment: Alignment.center,
+              child: Container(
+                  margin: const EdgeInsets.only(top: 20, bottom: 20),
+                  child: Text(
+                    tr("Sign in"),
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                  ))),
+          Visibility(visible: false, child: Column(children: [Align(
               alignment: Alignment.center,
               child: Container(
                   margin: const EdgeInsets.only(top: 5),
@@ -313,12 +313,28 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
                       ),
                       onPressed: _login,
                       child: Text(tr("Login"), style: const TextStyle(color: Colors.white))))),
-          Align(
+              ])),
+
+            Align(
+              child: SizedBox(width: 72*3, child: TextFormField (
+                obscureText: !_showPin,
+                controller: _pinController,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+                decoration: InputDecoration(
+                  suffixIcon: ClassOutlinedButton.createImage((){setState((){_showPin = !_showPin;});}, _showPin ? "images/hidden.png" : "images/view.png")
+                ),
+              ))
+            ),
+
+              Align(
             alignment: Alignment.center,
-            child: Container(margin: const EdgeInsets.all(5),
-                child: Column (
+            child: Column (
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(margin: const EdgeInsets.all(5), child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     ClassOutlinedButton.create((){_pin("7");}, "7", h: 72, w: 72),
                     ClassOutlinedButton.create((){_pin("8");}, "8", h: 72, w: 72),
@@ -326,6 +342,7 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
                   ],
                 )),
                 Container(margin: const EdgeInsets.all(5), child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     ClassOutlinedButton.create((){_pin("4");}, "4", h: 72, w: 72),
                     ClassOutlinedButton.create((){_pin("5");}, "5", h: 72, w: 72),
@@ -333,6 +350,7 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
                   ],
                 )),
                 Container(margin: const EdgeInsets.all(5), child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     ClassOutlinedButton.create((){_pin("1");}, "1", h: 72, w: 72),
                     ClassOutlinedButton.create((){_pin("2");}, "2", h: 72, w: 72),
@@ -340,14 +358,15 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
                   ],
                 )),
                 Container(margin: const EdgeInsets.all(5), child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     ClassOutlinedButton.createImage((){_loginPin();}, "images/user.png", h: 72, w: 72),
                     ClassOutlinedButton.create((){_pin("0");}, "0", h: 72, w: 72),
-                    ClassOutlinedButton.createImage((){}, "images/cancel.png", h: 72, w: 72),
+                    ClassOutlinedButton.createImage((){_pinController.clear();}, "images/cancel.png", h: 72, w: 72),
                   ],
                 ))
               ],
-            ))
+            )
           ),
           Align(
               child: Container(
