@@ -92,6 +92,25 @@ class WidgetTablesState extends BaseWidgetState<WidgetTables> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_get_table_list);
+        sendSocketMessage(m);
+        break;
+
+      case AppLifecycleState.inactive:
+        break;
+
+      case AppLifecycleState.paused:
+        break;
+
+      case AppLifecycleState.detached:
+        break;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
         body: SafeArea(

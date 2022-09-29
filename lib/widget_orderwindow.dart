@@ -48,6 +48,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
   int _selectedOrderDishIndex = -1;
   List<ClassOrderDish> _orderDishes = [];
   final ScrollController _orderScrollController = ScrollController();
+  ClassMenuDish? tempDish;
 
   @override
   void handler(Uint8List data) async {
@@ -155,6 +156,9 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
           m.addString(widget.table.orderid!);
           sendSocketMessage(m);
           break;
+        case SocketMessage.op_create_header:
+    
+          break;
       }
     }
   }
@@ -243,8 +247,9 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                   },
                   child: Image.asset("images/menu.png", width: 36, height: 36))),
         ]),
-                  Visibility(visible: Config.getInt(key_protocol_version) == 3, child: Row(
-          children: [
+        Visibility(
+          visible: Config.getInt(key_protocol_version) == 3,
+          child: Row(children: [
             Expanded(
                 child: Container(
                     margin: const EdgeInsets.only(left: 5, top: 2, right: 5),
@@ -267,9 +272,9 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                           Image.asset("images/car.png"),
                           Expanded(child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: Container(margin: const EdgeInsets.only(left: 5), child: Text(_getCarTitle())))),
                         ])))),
-            ClassOutlinedButton.createImage((){
+            ClassOutlinedButton.createImage(() {
               if (widget.table.customer != null) {
-                launchUrl(Uri(scheme: "tel", path:"${widget.table.customer!.phone}"));
+                launchUrl(Uri(scheme: "tel", path: "${widget.table.customer!.phone}"));
               }
             }, "images/call.png")
           ]),
@@ -515,11 +520,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
               width: _menuWidth / colCount,
               child: Align(
                   alignment: Alignment.center,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.max,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                  child: Column(mainAxisAlignment: MainAxisAlignment.start, mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Expanded(
                         child: Text(cd.name,
                             textAlign: TextAlign.center,
@@ -530,8 +531,18 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                     Container(width: double.infinity, height: 20, decoration: BoxDecoration(border: Border.all(color: Colors.blueAccent), color: Colors.white), child: Text(textAlign: TextAlign.center, "${md.price}"))
                   ]))), onTap: () {
         if (widget.table.orderid == null || widget.table.orderid!.isEmpty) {
-          sd(tr("Set the car first"));
-          return;
+          switch (Config.getInt(key_protocol_version)) {
+            case 1:
+            case 2:
+              tempDish = md;
+              SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_create_header);
+              m.addInt(widget.table.id);
+              sendSocketMessage(m);
+              return;
+            case 3:
+              sd(tr("Set the car first"));
+              return;
+          }
         }
         SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_add_dish_to_order);
         m.addString(widget.table.orderid!);
