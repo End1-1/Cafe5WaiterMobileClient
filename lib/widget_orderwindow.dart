@@ -114,14 +114,23 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                 ntdishes.getRawData(i, 7),
                 ntdishes.getRawData(i, 8),
                 ntdishes.getRawData(i, 9),
+                ntdishes.getRawData(i, 10),
               );
               _orderDishes.add(co);
             }
           });
           break;
+        case SocketMessage.op_create_header:
+          int isNewOrder = m.getByte();
+          String orderid = m.getString();
+          widget.table.orderid = orderid;
+          if (tempDish != null) {
+            _sendDishToServer(tempDish!);
+          }
+          break;
         case SocketMessage.op_add_dish_to_order:
           setState(() {
-            ClassOrderDish co = ClassOrderDish(m.getString(), m.getInt(), m.getDouble(), m.getDouble(), m.getDouble(), m.getDouble(), m.getInt(), m.getString(), m.getString(), "");
+            ClassOrderDish co = ClassOrderDish(m.getString(), m.getInt(), m.getDouble(), m.getDouble(), m.getDouble(), m.getDouble(), m.getDouble(), m.getInt(), m.getString(), m.getString(), "");
             _orderDishes.add(co);
             _orderScrollController.jumpTo(_orderScrollController.position.maxScrollExtent);
           });
@@ -157,7 +166,6 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
           sendSocketMessage(m);
           break;
         case SocketMessage.op_create_header:
-    
           break;
       }
     }
@@ -428,11 +436,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
         width: MediaQuery.of(context).size.width,
         child: GestureDetector(
           onTap: () {
-            setState(() {
-              _hideMenu = true;
-              _startx = 0;
-              _menuAnimationDuration = 300;
-            });
+            _hideOrderMenu();
           },
           onPanUpdate: (details) {
             if (_startx - details.delta.dx > 0) {
@@ -473,7 +477,11 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                               children: [
                                 ClassOutlinedButton.createImage(() {
                                   setState(() {
-                                    _menuType = _prevMenuType;
+                                    if (_menuType == _prevMenuType) {
+                                      _hideOrderMenu();
+                                    } else {
+                                      _menuType = _prevMenuType;
+                                    }
                                   });
                                 }, "images/back.png"),
                                 Expanded(child: Container())
@@ -530,6 +538,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                             ))),
                     Container(width: double.infinity, height: 20, decoration: BoxDecoration(border: Border.all(color: Colors.blueAccent), color: Colors.white), child: Text(textAlign: TextAlign.center, "${md.price}"))
                   ]))), onTap: () {
+        md.dish = cd;
         if (widget.table.orderid == null || widget.table.orderid!.isEmpty) {
           switch (Config.getInt(key_protocol_version)) {
             case 1:
@@ -544,14 +553,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
               return;
           }
         }
-        SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_add_dish_to_order);
-        m.addString(widget.table.orderid!);
-        m.addInt(cd.id);
-        m.addDouble(md.price);
-        m.addInt(md.storeid);
-        m.addString(md.print1);
-        m.addString(md.print2);
-        sendSocketMessage(m);
+        _sendDishToServer(md);
       });
       cells.add(dc);
       col++;
@@ -637,5 +639,25 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
         return _dishes();
     }
     return const Text("No menu type selected");
+  }
+
+  void _hideOrderMenu() {
+    setState(() {
+      _hideMenu = true;
+      _startx = 0;
+      _menuAnimationDuration = 300;
+    });
+  }
+
+  void _sendDishToServer(ClassMenuDish md){
+    SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_add_dish_to_order);
+    m.addString(widget.table.orderid!);
+    m.addInt(md.dish!.id);
+    m.addDouble(md.price);
+    m.addInt(md.storeid);
+    m.addString(md.print1);
+    m.addString(md.print2);
+    sendSocketMessage(m);
+    tempDish = null;
   }
 }

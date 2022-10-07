@@ -1,4 +1,4 @@
-import 'package:cafe5_waiter_mobile_client/class_dishpart2.dart';
+import 'class_dish.dart';
 
 class ClassMenuDish {
   int menuid;
@@ -8,6 +8,7 @@ class ClassMenuDish {
   String print1;
   String print2;
   int storeid;
+  ClassDish? dish;
 
   ClassMenuDish(this.menuid, this.typeid, this.dishid, this.price, this.print1, this.print2, this.storeid);
 
