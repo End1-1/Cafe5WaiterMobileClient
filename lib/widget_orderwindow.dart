@@ -341,6 +341,24 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                     sendSocketMessage(m);
                   }
                 }, "images/minus.png", h: 48, w: 48),
+
+                ClassOutlinedButton.createImage(() {
+                  if (_selectedOrderDishIndex < 0) {
+                    return;
+                  }
+                  final ClassOrderDish co = _orderDishes.elementAt(_selectedOrderDishIndex);
+                  if (co.qtyprint > 0.01) {
+                    return;
+                  }
+                  if (co.qty > 1 && co.qtyprint < 0.01) {
+                    SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_modify_order_dish);
+                    m.addString(co.id);
+                    m.addDouble(co.qty);
+                    m.addString(co.comment);
+                    sendSocketMessage(m);
+                  }
+                }, "images/message.png", h: 48, w: 48),
+
                 ClassOutlinedButton.createImage(() {
                   if (widget.table.orderid == null || widget.table.orderid!.isEmpty) {
                     return;
@@ -360,10 +378,13 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                     }, () {});
                   }
                 }, "images/printer.png", h: 48, w: 48),
+
+
                 Expanded(
                     child: Container(
-                  color: Colors.green,
-                ))
+                      color: Colors.green,
+                    )),
+
               ],
             ))
       ]),

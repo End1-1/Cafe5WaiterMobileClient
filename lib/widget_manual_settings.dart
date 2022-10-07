@@ -26,12 +26,12 @@ class WidgetManualSettings extends StatefulWidget {
 
 class WidgetManualSettingsState extends State<WidgetManualSettings> {
 
-  final TextEditingController _eServer = TextEditingController();
-  final TextEditingController _ePort = TextEditingController();
-  final TextEditingController _eUser = TextEditingController();
-  final TextEditingController _ePassword = TextEditingController();
-  final TextEditingController _eDatabase = TextEditingController();
-  final TextEditingController _eProtocol = TextEditingController();
+  final TextEditingController _eServer = TextEditingController(text: Config.getString(key_server_address));
+  final TextEditingController _ePort = TextEditingController(text: Config.getString(key_server_port));
+  final TextEditingController _eUser = TextEditingController(text: Config.getString(key_server_username));
+  final TextEditingController _ePassword = TextEditingController(text: Config.getString(key_server_password));
+  final TextEditingController _eDatabase = TextEditingController(text: Config.getString(key_database_name));
+  final TextEditingController _eProtocol = TextEditingController(text: Config.getInt(key_protocol_version).toString());
 
   @override
   Widget build(BuildContext context) {
@@ -71,6 +71,7 @@ class WidgetManualSettingsState extends State<WidgetManualSettings> {
                           Config.setString(key_database_name, _eDatabase.text);
                           Config.setInt(key_protocol_version, int.tryParse(_eProtocol.text)!);
                           ClientSocket.init(Config.getString(key_server_address), int.tryParse(Config.getString(key_server_port)) ?? 0);
+                          Navigator.pop(context, null);
                         },
                         child: Image.asset("images/done.png", width: 36, height: 36))),
               ]),
