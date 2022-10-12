@@ -30,6 +30,9 @@ class SocketMessage {
   static const int op_modify_order_dish = 19;
   static const int op_print_service = 20;
   static const int op_login_pin = 21;
+  static const int op_update_tables = 22;
+  static const int op_get_dish_comments = 23;
+  static const int op_print_bill = 24;
 
   static const String waiterclientp = "8b90e61a-1385-4fb4-85ce-f23849045e69";
 

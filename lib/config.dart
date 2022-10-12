@@ -19,6 +19,7 @@ List<String> dbCreate = [
   "create table dish_part2 (id int primary key, parentid int, part1 int, bgcolor int, textcolor int, name text, q int)",
   "create table dish (id int, part2 int, bgcolor int, textcolor int, name text, q int)",
   "create table car_model (id int, name text)",
+  "create table dish_comment (id int, forid int, name text)",
   "create table dish_menu (id int, menuid int, typeid int, dishid int, price real, storeid int, print1 text, print2 text)"
 ];
 

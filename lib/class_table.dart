@@ -8,6 +8,7 @@ class ClassTable {
   int hallid;
   String name;
   String? orderid;
+  String owner = "";
   ClassCustomer? customer;
   ClassCarModel? car;
 

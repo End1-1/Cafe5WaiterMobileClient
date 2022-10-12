@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:cafe5_waiter_mobile_client/base_widget.dart';
@@ -11,7 +10,6 @@ import 'package:cafe5_waiter_mobile_client/class_outlinedbutton.dart';
 import 'package:cafe5_waiter_mobile_client/class_table.dart';
 import 'package:cafe5_waiter_mobile_client/config.dart';
 import 'package:cafe5_waiter_mobile_client/db.dart';
-import 'package:cafe5_waiter_mobile_client/client_socket.dart';
 import 'package:cafe5_waiter_mobile_client/network_table.dart';
 import 'package:cafe5_waiter_mobile_client/socket_message.dart';
 import 'package:cafe5_waiter_mobile_client/translator.dart';
@@ -19,8 +17,10 @@ import 'package:cafe5_waiter_mobile_client/widget_halls.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
+import 'class_dish_comment.dart';
+
 class WidgetHome extends StatefulWidget {
-  WidgetHome() {
+  WidgetHome({super.key}) {
     print("Create WidgetHome");
   }
 
@@ -35,9 +35,9 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
   bool _showPin = false;
   String _progressString = "";
   late AnimationController animationController;
-  TextEditingController _usernameController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
-  TextEditingController _pinController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _pinController = TextEditingController();
 
   @override
   void initState() {
@@ -85,6 +85,17 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
         case SocketMessage.op_login_pin:
           Config.setString(key_session_id, m.getString());
           Config.setString(key_fullname, m.getString());
+          if (Config.getBool(key_data_dont_update)) {
+            _startWithoutDataLoad();
+            return;
+          }
+          m = SocketMessage.dllplugin(SocketMessage.op_get_hall_list);
+          sendSocketMessage(m);
+          setState(() {
+            _progressString = tr("Loading list of halls");
+          });
+          break;
+        case SocketMessage.op_login_pashhash:
           if (Config.getBool(key_data_dont_update)) {
             _startWithoutDataLoad();
             return;
@@ -186,21 +197,27 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
             await b.commit();
           });
           setState(() {
+            _progressString = tr("Loading dish comments");
+          });
+          m = SocketMessage.dllplugin(SocketMessage.op_get_dish_comments);
+          sendSocketMessage(m);
+          break;
+        case SocketMessage.op_get_dish_comments:
+          NetworkTable nt = NetworkTable();
+          nt.readFromSocketMessage(m);
+          await Db.db!.transaction((txn) async {
+            Batch b = txn.batch();
+            b.delete("dish_comment");
+            for (int i = 0; i < nt.rowCount; i++) {
+              b.insert("dish_comment", {'id': nt.getRawData(i, 0), 'forid': nt.getRawData(i, 1), 'name': nt.getRawData(i, 2)});
+            }
+            await b.commit();
+          });
+          setState(() {
             _progressString = tr("Loading car models");
           });
           m = SocketMessage.dllplugin(SocketMessage.op_car_model);
           sendSocketMessage(m);
-          break;
-        case SocketMessage.op_login_pashhash:
-          if (Config.getBool(key_data_dont_update)) {
-            _startWithoutDataLoad();
-            return;
-          }
-          m = SocketMessage.dllplugin(SocketMessage.op_get_hall_list);
-          sendSocketMessage(m);
-          setState(() {
-            _progressString = tr("Loading list of halls");
-          });
           break;
         case SocketMessage.op_car_model:
           NetworkTable nt = NetworkTable();
@@ -503,7 +520,15 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
         ClassMenuDish cm = ClassMenuDish(map[i]["menuid"], map[i]["typeid"], map[i]["dishid"], map[i]["price"], map[i]["print1"], map[i]["print2"], map[i]["storeid"]);
         ClassMenuDish.list.add(cm);
       });
-      ClassMenuDish.buildPart2();
+    });
+    ClassMenuDish.buildPart2();
+
+    await Db.query("dish_comment").then((map) {
+      ClassDishComment.list.clear();
+      List.generate(map.length, (i) {
+        ClassDishComment cm = ClassDishComment(map[i]["id"], map[i]["forid"], map[i]["name"]);
+        ClassDishComment.list.add(cm);
+      });
     });
 
     print(DateTime.now());

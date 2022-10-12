@@ -11,6 +11,7 @@ import 'package:cafe5_waiter_mobile_client/network_table.dart';
 import 'package:cafe5_waiter_mobile_client/socket_message.dart';
 import 'package:cafe5_waiter_mobile_client/widget_setcar.dart';
 import 'package:cafe5_waiter_mobile_client/widget_tables.dart';
+import 'package:cafe5_waiter_mobile_client/window_dish_comment.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:cafe5_waiter_mobile_client/base_widget.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +24,7 @@ import 'package:cafe5_waiter_mobile_client/widget_tables.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class WidgetOrderWindow extends StatefulWidget {
+
   ClassTable table;
 
   WidgetOrderWindow({required this.table});
@@ -80,6 +82,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
       switch (op) {
         case SocketMessage.op_open_table:
           widget.table.orderid = m.getString();
+          widget.table.owner = m.getString();
           if (widget.table.orderid!.isNotEmpty) {
             SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_get_car);
             m.addString(widget.table.orderid!);
@@ -144,6 +147,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                 return;
               }
             }
+            _selectedOrderDishIndex = -1;
           });
           break;
         case SocketMessage.op_modify_order_dish:
@@ -164,6 +168,9 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
           m = SocketMessage.dllplugin(SocketMessage.op_open_order);
           m.addString(widget.table.orderid!);
           sendSocketMessage(m);
+          setState((){
+            _selectedOrderDishIndex = -1;
+          });
           break;
         case SocketMessage.op_create_header:
           break;
@@ -219,11 +226,9 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: SafeArea(
+          minimum: const EdgeInsets.all(5),
             child: Stack(children: [
       Column(mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Container(
-          height: 5,
-        ),
         Visibility(
             visible: _dataErrorString.isNotEmpty,
             child: Align(
@@ -238,7 +243,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
             sendSocketMessage(m);
           }, "images/back.png"),
           Expanded(child: Container()),
-          Container(child: Text(widget.table.name)),
+          Row(children: [Text(widget.table.name, style: const TextStyle(fontWeight: FontWeight.bold)), const Text(", "), Text(widget.table.owner.isEmpty ? Config.getString(key_fullname) : widget.table.owner, style: const TextStyle(fontWeight: FontWeight.bold))]),
           Container(
               width: 36,
               height: 36,
@@ -255,6 +260,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                   },
                   child: Image.asset("images/menu.png", width: 36, height: 36))),
         ]),
+        Container(color: Colors.blueGrey, height: 5,),
         Visibility(
           visible: Config.getInt(key_protocol_version) == 3,
           child: Row(children: [
@@ -293,6 +299,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
               left: 10,
               top: 5,
               bottom: 5,
+              right: 5
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -350,12 +357,20 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                   if (co.qtyprint > 0.01) {
                     return;
                   }
-                  if (co.qty > 1 && co.qtyprint < 0.01) {
-                    SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_modify_order_dish);
-                    m.addString(co.id);
-                    m.addDouble(co.qty);
-                    m.addString(co.comment);
-                    sendSocketMessage(m);
+                  if (co.qty > 0.01) {
+                    Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => WidgetDishComment(co.dishid, co.comment))).then((value) {
+                      if (value == null) {
+                        return;
+                      }
+                      setState((){
+                        co.comment = value;
+                      });
+                      SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_modify_order_dish);
+                      m.addString(co.id);
+                      m.addDouble(co.qty);
+                      m.addString(co.comment);
+                      sendSocketMessage(m);
+                    });
                   }
                 }, "images/message.png", h: 48, w: 48),
 
@@ -378,13 +393,31 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                     }, () {});
                   }
                 }, "images/printer.png", h: 48, w: 48),
-
-
                 Expanded(
                     child: Container(
                       color: Colors.green,
                     )),
-
+                ClassOutlinedButton.createImage(() {
+                  if (widget.table.orderid == null || widget.table.orderid!.isEmpty) {
+                    return;
+                  }
+                  bool found = false;
+                  for (ClassOrderDish co in _orderDishes) {
+                    if (co.qtyprint < 0.01) {
+                      found = true;
+                      break;
+                    }
+                  }
+                  if (!found) {
+                    sq(tr("Print bill"), () {
+                      SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_print_bill);
+                      m.addString(widget.table.orderid!);
+                      sendSocketMessage(m);
+                    }, () {});
+                  } else {
+                    sd(tr("Order is not completed"));
+                  }
+                }, "images/bill.png", h: 48, w: 48),
               ],
             ))
       ]),
@@ -404,10 +437,14 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                     _selectedOrderDishIndex = index;
                   }),
               child: Container(
-                  height: 50,
-                  color: index == _selectedOrderDishIndex ? const Color(0xA5DADEFF) : (index % 2 == 0 ? Colors.white : Colors.black12),
+                  height: co.comment.isEmpty ? 50 : 60,
+                  color: index == _selectedOrderDishIndex ? const Color(0xA5DADEFF) : (co.qtyprint > 0.01 ? const Color(0xffffd561) : Colors.white),
                   padding: const EdgeInsets.only(top: 5, bottom: 5),
-                  child: Row(
+                  child: Container(
+                      decoration: const BoxDecoration(
+                        border: Border(top: BorderSide(color: Color(0xffa0a0a0))),
+                      ),
+                      child: Row(
                     children: [
                       Container(
                           width: 40,
@@ -416,19 +453,28 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                               alignment: Alignment.center,
                               child: Text(
                                 num(co.qty),
-                                style: const TextStyle(fontSize: 14),
+                                style: const TextStyle(fontSize: 14, ),
                               ))),
                       Container(
                           width: 250,
+                          height: co.comment.isEmpty ? 30 : 50,
                           margin: const EdgeInsets.only(top: 2),
                           child: Align(
                               alignment: Alignment.centerLeft,
-                              child: Text(ClassDish.map[co.dishid]!.name,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                  children:[Text(ClassDish.map[co.dishid]!.name,
                                   textAlign: TextAlign.start,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
                                     fontSize: 14,
-                                  )))),
+                                  ),
+                              ),
+                              Visibility(
+                                visible: co.comment.isNotEmpty,
+                                child: Text(co.comment)
+                              )
+                              ]))),
                       Container(
                           margin: const EdgeInsets.only(top: 2),
                           child: Align(
@@ -438,7 +484,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                                 style: const TextStyle(fontSize: 14),
                               )))
                     ],
-                  )));
+                  ))));
         });
   }
 
@@ -584,7 +630,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
         cells = [];
       }
     }
-    if (cells.length > 0) {
+    if (cells.isNotEmpty) {
       while (cells.length < colCount) {
         cells.add(const DataCell(Text("")));
       }

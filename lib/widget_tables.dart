@@ -18,7 +18,7 @@ import 'package:sqflite/sqlite_api.dart';
 class WidgetTables extends StatefulWidget {
   int hall;
 
-  WidgetTables({required this.hall});
+  WidgetTables({super.key, required this.hall});
 
   @override
   State<StatefulWidget> createState() {
@@ -78,7 +78,7 @@ class WidgetTablesState extends BaseWidgetState<WidgetTables> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      _timer = Timer.periodic(Duration(seconds: 10), (t) {
+      _timer = Timer.periodic(const Duration(seconds: 10), (t) {
         SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_get_table_list);
         sendSocketMessage(m);
       });
@@ -114,108 +114,78 @@ class WidgetTablesState extends BaseWidgetState<WidgetTables> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: SafeArea(
+            minimum: const EdgeInsets.all(5),
             child: Stack(children: [
-      Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            height: 5,
-          ),
-          Row(children: [
-            Container(
-                width: 36,
-                height: 36,
-                margin: EdgeInsets.only(left: 5),
-                child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.all(2),
-                    ),
-                    onPressed: () {
-                      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (BuildContext context) => WidgetHalls()), (route) => false);
-                    },
-                    child: Image.asset("images/back.png", width: 36, height: 36))),
-            Expanded(child: Container()),
-            Container(
-                width: 36,
-                height: 36,
-                margin: EdgeInsets.only(left: 5, right: 5),
-                child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.all(2),
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _hideMenu = false;
-                        startx = 0;
-                        _menuAnimationDuration = 300;
-                      });
-                    },
-                    child: Image.asset("images/menu.png", width: 36, height: 36))),
-          ]),
-          Expanded(child: SingleChildScrollView(child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: _listOfTables())))
-        ],
-      ),
-      _menu()
-    ])));
+              Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(children: [
+                    SizedBox(
+                        width: 36,
+                        height: 36,
+                        child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.all(2),
+                            ),
+                            onPressed: () {
+                              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (BuildContext context) => WidgetHalls()), (route) => false);
+                            },
+                            child: Image.asset("images/back.png", width: 36, height: 36))),
+                    Expanded(child: Container()),
+                    Text(Config.getString(key_fullname), style: const TextStyle(fontWeight: FontWeight.bold)),
+                    Expanded(child: Container()),
+                    SizedBox(
+                        width: 36,
+                        height: 36,
+                        child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.all(2),
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _hideMenu = false;
+                                startx = 0;
+                                _menuAnimationDuration = 300;
+                              });
+                            },
+                            child: Image.asset("images/menu.png", width: 36, height: 36))),
+                  ]),
+                  Container(color: Colors.blueGrey, height: 5,),
+                  Expanded(child: SingleChildScrollView(child: _listOfTables()))
+                ],
+              ),
+              _menu()
+            ])));
   }
 
   Widget _listOfTables() {
     if (ClassTable.list.isEmpty) {
       return Align(alignment: Alignment.center, child: Text(tr("List of tables is empty")));
     }
+    double columnWidth = (MediaQuery.of(context).size.width - 30) / 4;
 
-    const int columnsCount = 4;
-    double columnWidth = (MediaQuery.of(context).size.width - 40) / columnsCount;
-    List<DataColumn> columns = [];
-    for (int i = 0; i < columnsCount; i++) {
-      columns.add(DataColumn(label: Text("")));
-    }
-
-    List<DataRow> rows = [];
-    List<DataCell> cells = [];
-    int column = 0;
-    print("in data ${ClassTable.list.length}");
+    List<Widget> tl = [];
     for (int i = 0; i < ClassTable.list.length; i++) {
       final ClassTable t = ClassTable.list.elementAt(i);
       if (t.hallid != widget.hall) {
         continue;
       }
-      DataCell dc = DataCell(Container(
+      tl.add(Container(
           color: _tableStateColor(t.stateid),
-          margin: EdgeInsets.only(right: 3, bottom: 3),
           width: columnWidth,
           height: columnWidth,
           child: OutlinedButton(
             onPressed: () {
-              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (BuildContext context) => WidgetOrderWindow(table: t)), (route) => true);
+              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (BuildContext context) => WidgetOrderWindow(table: t)), (route) => true).then((value){
+                SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_get_table_list);
+                sendSocketMessage(m);
+              });
             },
             child: Text(t.name),
           )));
-      cells.add(dc);
-      column++;
-      if (column >= columnsCount) {
-        column = 0;
-        rows.add(DataRow(cells: cells));
-        cells = [];
-      }
     }
-    if (cells.length > 0) {
-      while (cells.length < columnsCount) {
-        cells.add(DataCell(Text("")));
-      }
-      rows.add(DataRow(cells: cells));
-    }
-
-    return Theme(
-        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-        child: DataTable(
-          dividerThickness: 0,
-          columnSpacing: 0,
-          dataRowHeight: columnWidth,
-          columns: columns,
-          rows: rows,
-        ));
+    return Wrap(runSpacing: 5, spacing: 5, children: tl);
   }
 
   Color _tableStateColor(int state) {
@@ -273,7 +243,7 @@ class WidgetTablesState extends BaseWidgetState<WidgetTables> {
                       right: 0,
                       width: MediaQuery.of(context).size.width - (MediaQuery.of(context).size.width / 3),
                       child: Container(
-                        color: Color(0XffDDEEAA),
+                        color: const Color(0XffDDEEAA),
                         child: Column(
                           children: [
                             Container(
@@ -285,10 +255,10 @@ class WidgetTablesState extends BaseWidgetState<WidgetTables> {
                                 Container(
                                     width: 36,
                                     height: 36,
-                                    margin: EdgeInsets.only(left: 5, right: 5),
+                                    margin: const EdgeInsets.only(left: 5, right: 5),
                                     child: OutlinedButton(
                                         style: OutlinedButton.styleFrom(
-                                          padding: EdgeInsets.all(2),
+                                          padding: const EdgeInsets.all(2),
                                         ),
                                         onPressed: () {
                                           setState(() {
@@ -308,10 +278,10 @@ class WidgetTablesState extends BaseWidgetState<WidgetTables> {
                                 }),
                             Container(
                                 height: 36,
-                                margin: EdgeInsets.only(left: 5, right: 5),
+                                margin: const EdgeInsets.only(left: 5, right: 5),
                                 child: OutlinedButton(
                                     style: OutlinedButton.styleFrom(
-                                      padding: EdgeInsets.all(2),
+                                      padding: const EdgeInsets.all(2),
                                     ),
                                     onPressed: () {
                                       setState(() {

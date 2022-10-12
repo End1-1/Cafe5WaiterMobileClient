@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:cafe5_waiter_mobile_client/client_socket_interface.dart';
-import 'package:cafe5_waiter_mobile_client/config.dart';
 import 'package:cafe5_waiter_mobile_client/socket_message.dart';
 
 class ClientSocket {
@@ -12,18 +11,20 @@ class ClientSocket {
   static SecureSocket? _socket;
   String remoteAddress;
   int remotePort;
-  BytesBuilder _tempBuffer = BytesBuilder();
+  final BytesBuilder _tempBuffer = BytesBuilder();
   static List<SocketInterface> _interfaces =[];
 
   ClientSocket ({required this.remoteAddress, required this.remotePort});
 
   static void init(String ip, int port) async {
-    socket = new ClientSocket(remoteAddress: ip, remotePort: port);
+    socket = ClientSocket(remoteAddress: ip, remotePort: port);
   }
 
-  void connect() async {
-    while (_interfaces.length == 0) {
-      await Future.delayed(const Duration(seconds: 5));
+  Future<void> connect(bool wait) async {
+    if (wait) {
+      while (_interfaces.isEmpty) {
+        await Future.delayed(const Duration(seconds: 5));
+      }
     }
     connectToServer();
   }
@@ -32,10 +33,10 @@ class ClientSocket {
     if (_socket != null) {
       _socket!.destroy();
     }
-    print("Connect to ${socket.remoteAddress}:${socket.remotePort}");
+    print("${DateTime.now()} Connect to ${socket.remoteAddress}:${socket.remotePort}");
     await SecureSocket.connect(socket.remoteAddress, socket.remotePort, timeout: Duration(seconds: 10), onBadCertificate: (x){return true;}).then((s) {
-      print("Socket connected ${s.hashCode}");
-      _socket = s as SecureSocket;
+      print("${DateTime.now()} Socket connected ${s.hashCode}");
+      _socket = s;
       _listenSocket();
       setSocketState(1);
     }).onError((error, stackTrace) {
