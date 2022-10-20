@@ -1,26 +1,25 @@
 import 'dart:typed_data';
 
+import 'package:cafe5_waiter_mobile_client/base_widget.dart';
+import 'package:cafe5_waiter_mobile_client/class_car_model.dart';
 import 'package:cafe5_waiter_mobile_client/class_customer.dart';
 import 'package:cafe5_waiter_mobile_client/class_dish.dart';
+import 'package:cafe5_waiter_mobile_client/class_dishpart1.dart';
 import 'package:cafe5_waiter_mobile_client/class_dishpart2.dart';
 import 'package:cafe5_waiter_mobile_client/class_hall.dart';
 import 'package:cafe5_waiter_mobile_client/class_menudish.dart';
 import 'package:cafe5_waiter_mobile_client/class_orderdish.dart';
 import 'package:cafe5_waiter_mobile_client/class_outlinedbutton.dart';
+import 'package:cafe5_waiter_mobile_client/class_table.dart';
+import 'package:cafe5_waiter_mobile_client/config.dart';
 import 'package:cafe5_waiter_mobile_client/network_table.dart';
 import 'package:cafe5_waiter_mobile_client/socket_message.dart';
+import 'package:cafe5_waiter_mobile_client/translator.dart';
 import 'package:cafe5_waiter_mobile_client/widget_setcar.dart';
 import 'package:cafe5_waiter_mobile_client/widget_tables.dart';
 import 'package:cafe5_waiter_mobile_client/window_dish_comment.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:cafe5_waiter_mobile_client/base_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:cafe5_waiter_mobile_client/translator.dart';
-import 'package:cafe5_waiter_mobile_client/config.dart';
-import 'package:cafe5_waiter_mobile_client/db.dart';
-import 'package:cafe5_waiter_mobile_client/class_table.dart';
-import 'package:cafe5_waiter_mobile_client/class_car_model.dart';
-import 'package:cafe5_waiter_mobile_client/widget_tables.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class WidgetOrderWindow extends StatefulWidget {
@@ -46,6 +45,9 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
   double _screenWidth = 0;
   int _menuType = 1;
   int _prevMenuType = 1;
+  int _part1Filter = 0;
+  String _dishSearchFilter = "";
+  bool _searchVisible = false;
   int _selectedType = 0;
   int _selectedOrderDishIndex = -1;
   List<ClassOrderDish> _orderDishes = [];
@@ -244,6 +246,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
           }, "images/back.png"),
           Expanded(child: Container()),
           Row(children: [Text(widget.table.name, style: const TextStyle(fontWeight: FontWeight.bold)), const Text(", "), Text(widget.table.owner.isEmpty ? Config.getString(key_fullname) : widget.table.owner, style: const TextStyle(fontWeight: FontWeight.bold))]),
+          Expanded(child: Container()),
           Container(
               width: 36,
               height: 36,
@@ -553,12 +556,44 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                                     }
                                   });
                                 }, "images/back.png"),
-                                Expanded(child: Container())
-                              ],
-                            ),
+                                Visibility(visible: !_searchVisible, child: Expanded(child: Container())),
+                                Visibility(visible: !_searchVisible, child: ClassOutlinedButton.createImage(() {
+                                  setState(() {
+                                    _searchVisible = true;
+                                  });
+                                }, "images/search.png")),
+                                Visibility(visible: _searchVisible, child: Row(
+                                    children: [ Container(
+                                      width: 120,
+                                  margin: const EdgeInsets.only(left: 3, right: 3),
+                                  child: TextField(
+                                    autofocus: true,
+                                    onChanged: (txt){
+                                      if (txt.length < 3 ){
+                                        _dishSearchFilter = "";
+                                        return;
+                                      }
+                                      setState(() {
+                                        _menuType = 2;
+                                        _dishSearchFilter = txt;
+                                      });
+                                    },
+                                  )
+                                ),
+                                ClassOutlinedButton.createImage(() {
+                                  setState(() {
+                                    _menuType = 1;
+                                    _part1Filter = 0;
+                                    _dishSearchFilter = "";
+                                    _searchVisible = false;
+                                  });
+                                }, "images/cancel.png")
+                              ]),
+                            )]),
                             Container(
                               height: 2,
                             ),
+                            _part1(),
                             Expanded(child: _menuBody()),
                           ],
                         )),
@@ -577,7 +612,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
     int colCount = 2;
     List<DataColumn> columns = [];
     for (int i = 0; i < colCount; i++) {
-      columns.add(DataColumn(label: Container(child: const Text(""))));
+      columns.add(const DataColumn(label: Text("")));
     }
 
     List<DataRow> rows = [];
@@ -585,10 +620,14 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
     int col = 0;
     for (int i = 0; i < ClassMenuDish.list.length; i++) {
       final ClassMenuDish md = ClassMenuDish.list.elementAt(i);
-      if (_selectedType != md.typeid || h.menu != md.menuid) {
+      final ClassDish cd = ClassDish.map[md.dishid]!;
+      if (_dishSearchFilter.isNotEmpty) {
+        if (h.menu != md.menuid || !cd.name.toLowerCase().contains(_dishSearchFilter.toLowerCase())) {
+          continue;
+        }
+      } else if (_selectedType != md.typeid || h.menu != md.menuid) {
         continue;
       }
-      final ClassDish cd = ClassDish.map[md.dishid]!;
 
       DataCell dc = DataCell(
           Container(
@@ -642,16 +681,51 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
     return SingleChildScrollView(child: DataTable(horizontalMargin: 2, headingRowHeight: 0, dataRowHeight: 95, columnSpacing: 2, columns: columns, rows: rows));
   }
 
+  Widget _part1() {
+    if (ClassDishPart1.list.isEmpty) {
+      return Container();
+    }
+    return SizedBox(height: 30, child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: ClassDishPart1.list.length,
+        shrinkWrap: true,
+        itemBuilder: (BuildContext context, int index)
+    {
+      final ClassDishPart1 co = ClassDishPart1.list.elementAt(index);
+      return GestureDetector(
+          child: Container(
+            margin: const EdgeInsets.only(right: 3),
+            color: Colors.black12,
+            height: 30, width: 100, child: Align(alignment: Alignment.center,
+              child: Text(co.name, style: const TextStyle(fontWeight: FontWeight.bold))),),
+          onTap: () {
+            setState(() {
+              _menuType = 1;
+              _part1Filter = co.id;
+            });
+        },
+      );
+    }));
+  }
+
   Widget _part2(int level) {
     ClassHall? h = ClassHall.getHall(widget.table.hallid);
     if (h == null) {
       return const Text("Hall is null");
     }
 
+    List<int> p1 = [];
+      for (ClassDishPart2 p in ClassDishPart2.list) {
+        if (_part1Filter > 0 && p.part1 != _part1Filter) {
+          continue;
+        }
+        p1.add(p.id);
+    }
+    
     int colCount = 2;
     List<DataColumn> columns = [];
     for (int i = 0; i < colCount; i++) {
-      columns.add(DataColumn(label: Container(child: const Text(""))));
+      columns.add(const DataColumn(label: Text("")));
     }
 
     List<DataRow> rows = [];
@@ -660,7 +734,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
     final Set<int> availableList = ClassMenuDish.part2[h.menu]!;
     for (int i = 0; i < ClassDishPart2.list.length; i++) {
       final ClassDishPart2 d = ClassDishPart2.list.elementAt(i);
-      if (d.parentid != level || !availableList.contains(d.id)) {
+      if (d.parentid != level || !availableList.contains(d.id) || !p1.contains(d.id)) {
         continue;
       }
       DataCell dc = DataCell(

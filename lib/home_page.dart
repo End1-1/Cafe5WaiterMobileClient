@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:cafe5_waiter_mobile_client/base_widget.dart';
 import 'package:cafe5_waiter_mobile_client/class_car_model.dart';
 import 'package:cafe5_waiter_mobile_client/class_dish.dart';
+import 'package:cafe5_waiter_mobile_client/class_dishpart1.dart';
 import 'package:cafe5_waiter_mobile_client/class_dishpart2.dart';
 import 'package:cafe5_waiter_mobile_client/class_hall.dart';
 import 'package:cafe5_waiter_mobile_client/class_menudish.dart';
@@ -491,6 +492,14 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
       List.generate(map.length, (i) {
         ClassCarModel cm = ClassCarModel(id: map[i]["id"], name: map[i]["name"]);
         ClassCarModel.carModels.add(cm);
+      });
+    });
+
+    await Db.query("dish_part1").then((map) {
+      ClassDishPart1.list.clear();
+      List.generate(map.length, (i) {
+        ClassDishPart1 cd = ClassDishPart1(map[i]["id"], map[i]["name"]);
+        ClassDishPart1.list.add(cd);
       });
     });
 

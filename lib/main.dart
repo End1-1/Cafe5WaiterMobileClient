@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   //await Firebase.initializeApp();
-  LocalNotificationService().addNotification(message.notification!.title!, message.notification!.body!);
+  //LocalNotificationService().addNotification(message.notification!.title!, message.notification!.body!);
   print("Handling a background message: ${message.messageId}");
 }
 
@@ -18,20 +18,21 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Config.init();
   Firebase.initializeApp().then((value) {
-    if (Config.getString("firebase_token").isEmpty) {
       FirebaseMessaging.instance.getToken().then((value) {
         String token = value!;
         print("FIREBASE TOKEN");
         print(token);
         Config.setString("firebase_token", token);
+
+        FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+        FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+          LocalNotificationService().addNotification(message.notification!.title!, message.notification!.body!);
+        });
+        FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
+          LocalNotificationService().addNotification(message.notification!.title!, message.notification!.body!);
+        });
+
       });
-    } else {
-      print("Recently used ${Config.getString("firebase_token")}");
-    }
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
-      LocalNotificationService().addNotification(message.notification!.title!, message.notification!.body!);
-    });
   });
   Db.init(dbCreate);
   ClientSocket.init(Config.getString(key_server_address), int.tryParse(Config.getString(key_server_port)) ?? 0);

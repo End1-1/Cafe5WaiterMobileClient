@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:typed_data';
 import 'package:cafe5_waiter_mobile_client/widget_manual_settings.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
@@ -12,7 +11,7 @@ import 'package:cafe5_waiter_mobile_client/home_page.dart';
 import 'client_socket.dart';
 
 class WidgetChooseSettings extends StatefulWidget {
-
+  const WidgetChooseSettings({super.key});
   @override
   State<StatefulWidget> createState() {
     return WidgetChooseSettingsState();

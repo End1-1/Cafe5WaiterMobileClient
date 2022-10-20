@@ -28,11 +28,11 @@ class LocalNotificationService {
     final scheduleTime = tz.TZDateTime.fromMillisecondsSinceEpoch(tz.local, DateTime.now().millisecondsSinceEpoch + 1000);
 
 // #2
-    final androidDetail = AndroidNotificationDetails("channel_id", "channel_name");
+    const androidDetail = AndroidNotificationDetails("channel_id", "channel_name");
 
-    final iosDetail = DarwinNotificationDetails();
+    const iosDetail = DarwinNotificationDetails();
 
-    final noticeDetail = NotificationDetails(
+    const noticeDetail = NotificationDetails(
       iOS: iosDetail,
       android: androidDetail,
     );
