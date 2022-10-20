@@ -5,6 +5,7 @@ import 'package:cafe5_waiter_mobile_client/class_dish_comment.dart';
 import 'package:cafe5_waiter_mobile_client/translator.dart';
 import 'package:cafe5_waiter_mobile_client/base_widget.dart';
 import 'package:cafe5_waiter_mobile_client/socket_message.dart';
+import 'package:cafe5_waiter_mobile_client/widget_dish_manual_comment.dart';
 import 'package:flutter/material.dart';
 
 class WidgetDishComment extends StatefulWidget {
@@ -43,7 +44,7 @@ class WidgetDishCommentState extends BaseWidgetState<WidgetDishComment> {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _screenWidth = MediaQuery.of(context).size.width;
       _menuWidth = _screenWidth - (_screenWidth / 3);
-      setState((){});
+      setState(() {});
     });
   }
 
@@ -60,12 +61,37 @@ class WidgetDishCommentState extends BaseWidgetState<WidgetDishComment> {
                 Expanded(child: Container()),
                 Text(tr("Dish comment"), style: const TextStyle(fontWeight: FontWeight.bold)),
                 Expanded(child: Container()),
-                ClassOutlinedButton.createImage((){
+                ClassOutlinedButton.createImage(() {
                   Navigator.pop(context, widget.comment);
                 }, "images/done.png")
               ]),
+              Container(
+                color: Colors.blueGrey,
+                height: 5,
+              ),
               SizedBox(width: double.infinity, child: _selectedComments()),
-              Expanded(child: _comments(),)
+              Expanded(
+                child: _comments(),
+              ),
+              Container(
+                  margin: const EdgeInsets.only(left: 10, right: 10),
+                  height: 30,
+                  width: double.infinity,
+                  child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.all(2),
+                      ),
+                      onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => WidgetDishManualComment())).then((result) {
+                          if (result == null || result.isEmpty) {
+                            return;
+                          }
+                          setState(() {
+                            widget.comment = "${widget.comment},$result";
+                          });
+                        });
+                      },
+                      child: Align(alignment: Alignment.center, child: Row(children: [Expanded(child: Container()), Image.asset("images/edit.png", width: 25, height: 25), Text(tr("Edit comment")), Expanded(child: Container())]))))
             ])));
   }
 
@@ -76,13 +102,15 @@ class WidgetDishCommentState extends BaseWidgetState<WidgetDishComment> {
       if (l[i].isEmpty) {
         continue;
       }
-      w.add( Row(children:[Text(l[i], style: const TextStyle(fontWeight: FontWeight.bold)),
-      ClassOutlinedButton.createImage((){
-        setState(() {
-          l.removeAt(i);
-          widget.comment = l.join(",");
-        });
-      }, "images/cancel.png")]));
+      w.add(Row(children: [
+        Text(l[i], style: const TextStyle(fontWeight: FontWeight.bold)),
+        ClassOutlinedButton.createImage(() {
+          setState(() {
+            l.removeAt(i);
+            widget.comment = l.join(",");
+          });
+        }, "images/cancel.png")
+      ]));
     }
     return w;
   }
@@ -90,9 +118,9 @@ class WidgetDishCommentState extends BaseWidgetState<WidgetDishComment> {
   Widget _selectedComments() {
     return Wrap(
       spacing: 5,
-        runSpacing: 5,
-        children: _wrapSelectedComments(),
-      );
+      runSpacing: 5,
+      children: _wrapSelectedComments(),
+    );
   }
 
   Widget _comments() {
@@ -110,25 +138,25 @@ class WidgetDishCommentState extends BaseWidgetState<WidgetDishComment> {
 
       DataCell dc = DataCell(
           Container(
-              margin: const EdgeInsets.only(top: 2),
-              width: _screenWidth / colCount,
-              child: Align(
-                  alignment: Alignment.center,
-                  child: Align(alignment: Alignment.center, child: Text(cmn.name,
-                            textAlign: TextAlign.center,
-
-                            style: const TextStyle(
-                              fontSize: 14,
-                            )))),
-                  ),
-          onTap: () {
-            if (widget.comment.isNotEmpty) {
-              widget.comment += ",";
-            }
-            setState((){
-              widget.comment += cmn.name;
-            });
-          });
+            margin: const EdgeInsets.only(top: 2),
+            width: _screenWidth / colCount,
+            child: Align(
+                alignment: Alignment.center,
+                child: Align(
+                    alignment: Alignment.center,
+                    child: Text(cmn.name,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 14,
+                        )))),
+          ), onTap: () {
+        if (widget.comment.isNotEmpty) {
+          widget.comment += ",";
+        }
+        setState(() {
+          widget.comment += cmn.name;
+        });
+      });
 
       cells.add(dc);
       col++;

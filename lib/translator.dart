@@ -17,6 +17,8 @@ const Map<String, String> vals = {
   "customer phone number":"Հաճախորդի հեռախոսահամար",
   "set the car first": 'Մեքենան նշված չէ',
   'unknown':'Անհայտ',
+  'dish comment': 'Ուտեստի մեկնաբանություն',
+  'dish manual comment': 'Մեկնաբանության խմբագրում'
 };
 
 String tr(String s) {

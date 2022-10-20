@@ -397,7 +397,9 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                     child: Container(
                       color: Colors.green,
                     )),
-                ClassOutlinedButton.createImage(() {
+                Visibility (
+                visible: Config.getInt(key_protocol_version) != 3,
+                child: ClassOutlinedButton.createImage(() {
                   if (widget.table.orderid == null || widget.table.orderid!.isEmpty) {
                     return;
                   }
@@ -417,7 +419,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                   } else {
                     sd(tr("Order is not completed"));
                   }
-                }, "images/bill.png", h: 48, w: 48),
+                }, "images/bill.png", h: 48, w: 48))
               ],
             ))
       ]),
