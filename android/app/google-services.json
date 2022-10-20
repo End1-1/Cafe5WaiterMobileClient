@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "82856072782",
+    "project_id": "cafe5waitermobileclient",
+    "storage_bucket": "cafe5waitermobileclient.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:82856072782:android:9aee35349f33fc3cda551f",
+        "android_client_info": {
+          "package_name": "com.example.cafe5_mobile_client"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "82856072782-mcqb8lpv3fj2t346hqcbar3shfd5h7ta.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyANmqLiVhqB3XA3s2ggzjUElSMc8mX6mGo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "82856072782-mcqb8lpv3fj2t346hqcbar3shfd5h7ta.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
