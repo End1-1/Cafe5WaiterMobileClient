@@ -22,7 +22,7 @@ Future<void> main() async {
         String token = value!;
         print("FIREBASE TOKEN");
         print(token);
-        Config.setString("firebase_token", token);
+        Config.setString(key_firebase_token, token);
 
         FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
         FirebaseMessaging.onMessage.listen((RemoteMessage message) async {

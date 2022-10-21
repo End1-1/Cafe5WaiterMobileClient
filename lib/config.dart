@@ -11,6 +11,7 @@ const key_use_this_hall = "key_use_this_hall";
 const key_use_this_hall_id = "key_use_this_hall_id";
 const key_data_dont_update = "key_data_dont_update";
 const key_protocol_version = "key_protocol_vesion";
+const key_firebase_token = "key_firebase_token";
 
 List<String> dbCreate = [
   "create table halls (id int primary key, menuid int, servicevalue real, name, text)",

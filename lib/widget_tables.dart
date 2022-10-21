@@ -268,14 +268,6 @@ class WidgetTablesState extends BaseWidgetState<WidgetTables> {
                                         child: Image.asset("images/cancel.png", width: 36, height: 36)))
                               ],
                             ),
-                            CheckboxListTile(
-                                title: Text(tr("Update data")),
-                                value: !Config.getBool(key_data_dont_update),
-                                onChanged: (v) {
-                                  setState(() {
-                                    Config.setBool(key_data_dont_update, !v!);
-                                  });
-                                }),
                             Container(
                                 height: 36,
                                 margin: const EdgeInsets.only(left: 5, right: 5),
@@ -287,6 +279,7 @@ class WidgetTablesState extends BaseWidgetState<WidgetTables> {
                                       setState(() {
                                         sq(tr("Confirm to logout"), () {
                                           Config.setString(key_session_id, "");
+                                          Config.setBool(key_data_dont_update, false);
                                           Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (BuildContext context) => WidgetHome()), (route) => false);
                                         }, () {});
                                       });

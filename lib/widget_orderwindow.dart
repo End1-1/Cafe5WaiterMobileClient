@@ -291,7 +291,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                         ])))),
             ClassOutlinedButton.createImage(() {
               if (widget.table.customer != null) {
-                launchUrl(Uri(scheme: "tel", path: "${widget.table.customer!.phone}"));
+                launchUrl(Uri(scheme: "tel", path: widget.table.customer!.phone));
               }
             }, "images/call.png")
           ]),
@@ -351,7 +351,25 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                     sendSocketMessage(m);
                   }
                 }, "images/minus.png", h: 48, w: 48),
-
+                ClassOutlinedButton.createImage(() {
+                  if (_selectedOrderDishIndex < 0) {
+                    return;
+                  }
+                  final ClassOrderDish co = _orderDishes.elementAt(_selectedOrderDishIndex);
+                  if (co.qty <= 0.5 && co.qtyprint < 0.01) {
+                    SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_remove_dish_from_order);
+                    m.addString(co.id);
+                    sendSocketMessage(m);
+                    return;
+                  }
+                  if (co.qty > 0.5 && co.qtyprint < 0.01) {
+                    SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_modify_order_dish);
+                    m.addString(co.id);
+                    m.addDouble(co.qty - 0.5);
+                    m.addString(co.comment);
+                    sendSocketMessage(m);
+                  }
+                }, "images/half.png", h: 48, w: 48),
                 ClassOutlinedButton.createImage(() {
                   if (_selectedOrderDishIndex < 0) {
                     return;
@@ -638,13 +656,14 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                   alignment: Alignment.center,
                   child: Column(mainAxisAlignment: MainAxisAlignment.start, mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Expanded(
-                        child: Text(cd.name,
+                        child: Text(cd.name.toUpperCase(),
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: cd.textColor,
-                              fontSize: 12,
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold
                             ))),
-                    Container(width: double.infinity, height: 20, decoration: BoxDecoration(border: Border.all(color: Colors.blueAccent), color: Colors.white), child: Text(textAlign: TextAlign.center, "${md.price}"))
+                    Container(width: double.infinity, height: 20, decoration: BoxDecoration(border: Border.all(color: Colors.blueAccent), color: Colors.white), child: Text(textAlign: TextAlign.center, "${md.price}", style: const TextStyle(fontWeight: FontWeight.bold)))
                   ]))), onTap: () {
         md.dish = cd;
         if (widget.table.orderid == null || widget.table.orderid!.isEmpty) {
@@ -743,11 +762,12 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
               color: d.bgColor,
               child: Align(
                   alignment: Alignment.center,
-                  child: Text(d.name,
+                  child: Text(d.name.toUpperCase(),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: d.textColor,
-                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
                       )))), onTap: () {
         setState(() {
           _selectedType = d.id;

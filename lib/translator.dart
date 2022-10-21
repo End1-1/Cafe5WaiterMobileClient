@@ -18,7 +18,8 @@ const Map<String, String> vals = {
   "set the car first": 'Մեքենան նշված չէ',
   'unknown':'Անհայտ',
   'dish comment': 'Ուտեստի մեկնաբանություն',
-  'dish manual comment': 'Մեկնաբանության խմբագրում'
+  'dish manual comment': 'Մեկնաբանության խմբագրում',
+  'confirm to logout': 'Հաստատեք ելքը'
 };
 
 String tr(String s) {

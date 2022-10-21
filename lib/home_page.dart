@@ -54,6 +54,7 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
       if (Config.getString(key_session_id).isNotEmpty) {
         SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_login_pashhash);
         m.addString(Config.getString(key_session_id));
+        m.addString(Config.getString(key_firebase_token));
         sendSocketMessage(m);
       }
     });
@@ -461,6 +462,7 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
     });
     SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_login_pin);
     m.addString(_pinController.text);
+    m.addString(Config.getString(key_firebase_token));
     sendSocketMessage(m);
   }
 
