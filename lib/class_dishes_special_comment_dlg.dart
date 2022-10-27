@@ -5,43 +5,41 @@ import 'class_dish_comment.dart';
 
 class ClassDishesSpecialCommentDlg {
 
-  static Future<String?> getComment(BuildContext context, int dishid, String msg) async {
-    List<String> comments = [];
+  static Map<int, List<String>> specialComments = {};
+
+  static void init() {
     for (int i = 0; i < ClassDishComment.list.length; i++) {
       final ClassDishComment cmn = ClassDishComment.list.elementAt(i);
-      if (cmn.forid != dishid) {
-        continue;
+      if (cmn.forid > 0) {
+        if (!specialComments.containsKey(cmn.forid)) {
+          specialComments[cmn.forid] = [];
+        }
+        specialComments[cmn.forid]!.add(cmn.name);
       }
-      comments.add(cmn.name);
     }
+  }
+
+  static bool specialCommentForDish(int id) {
+    return specialComments.containsKey(id);
+  }
+
+  static Future<String?> getComment(BuildContext context, int dishid, String msg) async {
+
     return showDialog<String>(
       context: context,
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(tr('Dish required comment')),
-          content: SingleChildScrollView(
-            child: ListView.builder(
-          itemCount: comments.length,
-          shrinkWrap: true,
-          itemBuilder: (BuildContext context, int index) {
-            return GestureDetector(
-              onTap: (){
-                Navigator.of(context).pop(comments[index]);
-              },
-              child: SizedBox(
-                width: double.infinity,
-                  height: 50,
-                  child: Align(
-                alignment: Alignment.center,
-                child: Text(comments[index], style: const TextStyle())
-              ))
-            ) ;
-          },
+          content: SizedBox(
+            height: 300,
+        width: 300,
+        child: Column (
+            children: _comments(context, dishid)
           )),
           actions: [
             TextButton(
-              child: Text(tr("Ok")),
+              child: Text(tr("Cancel")),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -50,6 +48,30 @@ class ClassDishesSpecialCommentDlg {
         );
       },
     );
+  }
+
+  static List<Widget> _comments(BuildContext c, int id) {
+    List<Widget> w = [];
+    List<String>? comments = specialComments[id];
+    if (comments == null) {
+      w.add(const Text("Empty"));
+    } else {
+      for (String s in comments) {
+        w.add(GestureDetector(
+            onTap: (){
+              Navigator.of(c).pop(s);
+            },
+            child: SizedBox(
+                width: 200,
+                height: 50,
+                child: Align(
+                    alignment: Alignment.center,
+                    child: Text(s, style: const TextStyle())
+                ))
+        ));
+      }
+    }
+    return w;
   }
 
 }

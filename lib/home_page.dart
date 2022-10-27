@@ -19,6 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'class_dish_comment.dart';
+import 'class_dishes_special_comment_dlg.dart';
 
 class WidgetHome extends StatefulWidget {
   WidgetHome({super.key}) {
@@ -177,7 +178,7 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
             Batch b = txn.batch();
             b.delete("dish");
             for (int i = 0; i < nt.rowCount; i++) {
-              b.insert("dish", {'id': nt.getRawData(i, 0), 'part2': nt.getRawData(i, 1), 'bgcolor': nt.getRawData(i, 2), 'textcolor': nt.getRawData(i, 3), 'name': nt.getRawData(i, 4), 'q': nt.getRawData(i, 5)});
+              b.insert("dish", {'id': nt.getRawData(i, 0), 'part2': nt.getRawData(i, 1), 'bgcolor': nt.getRawData(i, 2), 'textcolor': nt.getRawData(i, 3), 'name': nt.getRawData(i, 4), 'q': nt.getRawData(i, 5), 'quicklist': nt.getRawData(i, 6)});
             }
             b.commit();
           });
@@ -518,7 +519,7 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
     await Db.query("dish").then((map) {
       ClassDish.map.clear();
       List.generate(map.length, (i) {
-        ClassDish cd = ClassDish(map[i]["id"], map[i]["part2"], map[i]["name"]);
+        ClassDish cd = ClassDish(map[i]["id"], map[i]["part2"], map[i]["name"], map[i]["quicklist"]);
         cd.bgColor = Color(map[i]["bgcolor"]);
         cd.textColor = Color(map[i]["textcolor"]);
         ClassDish.map[cd.id] = cd;
@@ -540,6 +541,7 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
         ClassDishComment cm = ClassDishComment(map[i]["id"], map[i]["forid"], map[i]["name"]);
         ClassDishComment.list.add(cm);
       });
+      ClassDishesSpecialCommentDlg.init();
     });
 
     print(DateTime.now());

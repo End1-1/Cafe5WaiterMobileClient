@@ -20,7 +20,8 @@ const Map<String, String> vals = {
   'dish comment': 'Ուտեստի մեկնաբանություն',
   'dish manual comment': 'Մեկնաբանության խմբագրում',
   'confirm to logout': 'Հաստատեք ելքը',
-  'dish required comment': 'Ուտեստի պարտադիր մեկնաբանություն'
+  'dish required comment': 'Ուտեստի պարտադիր մեկնաբանություն',
+  'cancel': 'Հրաժարվել',
 };
 
 String tr(String s) {

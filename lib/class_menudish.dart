@@ -7,6 +7,7 @@ class ClassMenuDish {
   double price;
   String print1;
   String print2;
+  String comment = "";
   int storeid;
   ClassDish? dish;
 

@@ -22,6 +22,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'class_dishes_special_comment_dlg.dart';
+
 class WidgetOrderWindow extends StatefulWidget {
 
   ClassTable table;
@@ -135,7 +137,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
           break;
         case SocketMessage.op_add_dish_to_order:
           setState(() {
-            ClassOrderDish co = ClassOrderDish(m.getString(), m.getInt(), m.getDouble(), m.getDouble(), m.getDouble(), m.getDouble(), m.getDouble(), m.getInt(), m.getString(), m.getString(), "");
+            ClassOrderDish co = ClassOrderDish(m.getString(), m.getInt(), m.getDouble(), m.getDouble(), m.getDouble(), m.getDouble(), m.getDouble(), m.getInt(), m.getString(), m.getString(), m.getString());
             _orderDishes.add(co);
             _orderScrollController.jumpTo(_orderScrollController.position.maxScrollExtent);
           });
@@ -664,8 +666,15 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                               fontWeight: FontWeight.bold
                             ))),
                     Container(width: double.infinity, height: 20, decoration: BoxDecoration(border: Border.all(color: Colors.blueAccent), color: Colors.white), child: Text(textAlign: TextAlign.center, "${md.price}", style: const TextStyle(fontWeight: FontWeight.bold)))
-                  ]))), onTap: () {
+                  ]))), onTap: () async {
         md.dish = cd;
+        if (ClassDishesSpecialCommentDlg.specialCommentForDish(md.dishid)) {
+          String? comment = await ClassDishesSpecialCommentDlg.getComment(context, md.dishid, cd.name);
+          if (comment == null) {
+            return;
+          }
+          md.comment = comment;
+        }
         if (widget.table.orderid == null || widget.table.orderid!.isEmpty) {
           switch (Config.getInt(key_protocol_version)) {
             case 1:
@@ -820,6 +829,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
     m.addInt(md.storeid);
     m.addString(md.print1);
     m.addString(md.print2);
+    m.addString(md.comment);
     sendSocketMessage(m);
     tempDish = null;
   }
