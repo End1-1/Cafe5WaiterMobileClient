@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:cafe5_waiter_mobile_client/home_page.dart';
 import 'package:cafe5_waiter_mobile_client/network_table.dart';
 import 'package:cafe5_waiter_mobile_client/socket_message.dart';
+import 'package:cafe5_waiter_mobile_client/widget_ready_dishes.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:cafe5_waiter_mobile_client/base_widget.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,8 @@ import 'package:cafe5_waiter_mobile_client/class_table.dart';
 import 'package:cafe5_waiter_mobile_client/widget_orderwindow.dart';
 import 'package:cafe5_waiter_mobile_client/widget_halls.dart';
 import 'package:sqflite/sqlite_api.dart';
+
+import 'class_outlinedbutton.dart';
 
 class WidgetTables extends StatefulWidget {
   int hall;
@@ -114,7 +117,7 @@ class WidgetTablesState extends BaseWidgetState<WidgetTables> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: SafeArea(
-            minimum: const EdgeInsets.all(5),
+            minimum: const EdgeInsets.only(left: 5, right: 5, bottom: 5, top: 35),
             child: Stack(children: [
               Column(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -135,6 +138,9 @@ class WidgetTablesState extends BaseWidgetState<WidgetTables> {
                     Expanded(child: Container()),
                     Text(Config.getString(key_fullname), style: const TextStyle(fontWeight: FontWeight.bold)),
                     Expanded(child: Container()),
+                    ClassOutlinedButton.createImage(() {
+                      Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => const WidgetReadyDishes()));
+                    }, "images/readydish.png"),
                     SizedBox(
                         width: 36,
                         height: 36,
@@ -151,7 +157,10 @@ class WidgetTablesState extends BaseWidgetState<WidgetTables> {
                             },
                             child: Image.asset("images/menu.png", width: 36, height: 36))),
                   ]),
-                  Container(color: Colors.blueGrey, height: 5,),
+                  Container(
+                    color: Colors.blueGrey,
+                    height: 5,
+                  ),
                   Expanded(child: SingleChildScrollView(child: _listOfTables()))
                 ],
               ),
@@ -177,7 +186,7 @@ class WidgetTablesState extends BaseWidgetState<WidgetTables> {
           height: columnWidth,
           child: OutlinedButton(
             onPressed: () {
-              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (BuildContext context) => WidgetOrderWindow(table: t)), (route) => true).then((value){
+              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (BuildContext context) => WidgetOrderWindow(table: t)), (route) => true).then((value) {
                 SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_get_table_list);
                 sendSocketMessage(m);
               });

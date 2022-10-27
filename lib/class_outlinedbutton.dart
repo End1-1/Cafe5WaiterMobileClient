@@ -21,7 +21,7 @@ class ClassOutlinedButton {
     return Container(
         width: w,
         height: h,
-        margin: const EdgeInsets.only(left: 5),
+        margin: const EdgeInsets.only(left: 3, right: 3),
         child: OutlinedButton(
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.all(2),

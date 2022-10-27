@@ -135,6 +135,9 @@ class WidgetDishCommentState extends BaseWidgetState<WidgetDishComment> {
     int col = 0;
     for (int i = 0; i < ClassDishComment.list.length; i++) {
       final ClassDishComment cmn = ClassDishComment.list.elementAt(i);
+      if (cmn.forid > 0) {
+        continue;
+      }
 
       DataCell dc = DataCell(
           Container(

@@ -19,7 +19,8 @@ const Map<String, String> vals = {
   'unknown':'Անհայտ',
   'dish comment': 'Ուտեստի մեկնաբանություն',
   'dish manual comment': 'Մեկնաբանության խմբագրում',
-  'confirm to logout': 'Հաստատեք ելքը'
+  'confirm to logout': 'Հաստատեք ելքը',
+  'dish required comment': 'Ուտեստի պարտադիր մեկնաբանություն'
 };
 
 String tr(String s) {
