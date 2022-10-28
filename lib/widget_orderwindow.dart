@@ -25,7 +25,6 @@ import 'package:url_launcher/url_launcher.dart';
 import 'class_dishes_special_comment_dlg.dart';
 
 class WidgetOrderWindow extends StatefulWidget {
-
   ClassTable table;
 
   WidgetOrderWindow({required this.table});
@@ -172,7 +171,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
           m = SocketMessage.dllplugin(SocketMessage.op_open_order);
           m.addString(widget.table.orderid!);
           sendSocketMessage(m);
-          setState((){
+          setState(() {
             _selectedOrderDishIndex = -1;
           });
           break;
@@ -230,224 +229,221 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: SafeArea(
-          minimum: const EdgeInsets.all(5),
+            minimum: const EdgeInsets.all(5),
             child: Stack(children: [
-      Column(mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Visibility(
-            visible: _dataErrorString.isNotEmpty,
-            child: Align(
-              alignment: Alignment.center,
-              child: Text(_dataErrorString),
-            )),
-        Row(children: [
-          ClassOutlinedButton.createImage(() {
-            SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_unlock_table);
-            m.addInt(widget.table.id);
-            m.addString(Config.getString(key_session_id));
-            sendSocketMessage(m);
-          }, "images/back.png"),
-          Expanded(child: Container()),
-          Row(children: [Text(widget.table.name, style: const TextStyle(fontWeight: FontWeight.bold)), const Text(", "), Text(widget.table.owner.isEmpty ? Config.getString(key_fullname) : widget.table.owner, style: const TextStyle(fontWeight: FontWeight.bold))]),
-          Expanded(child: Container()),
-          Container(
-              width: 36,
-              height: 36,
-              margin: const EdgeInsets.only(left: 5, right: 5),
-              child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.all(2),
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _hideMenu = false;
-                      _startx = 0;
-                    });
-                  },
-                  child: Image.asset("images/menu.png", width: 36, height: 36))),
-        ]),
-        Container(color: Colors.blueGrey, height: 5,),
-        Visibility(
-          visible: Config.getInt(key_protocol_version) == 3,
-          child: Row(children: [
-            Expanded(
-                child: Container(
-                    margin: const EdgeInsets.only(left: 5, top: 2, right: 5),
-                    height: 36,
-                    child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.only(left: 5),
-                        ),
-                        onPressed: () async {
-                          Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => WidgetSetCar(table: widget.table))).then((result) {
-                            if (result == null) {
-                              return;
-                            }
-                            setState(() {
-                              widget.table = result;
-                            });
-                          });
-                        },
-                        child: Row(children: [
-                          Image.asset("images/car.png"),
-                          Expanded(child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: Container(margin: const EdgeInsets.only(left: 5), child: Text(_getCarTitle())))),
-                        ])))),
-            ClassOutlinedButton.createImage(() {
-              if (widget.table.customer != null) {
-                launchUrl(Uri(scheme: "tel", path: widget.table.customer!.phone));
-              }
-            }, "images/call.png")
-          ]),
-        ),
-        Expanded(child: _orderDishesTable()),
-        Container(
-            padding: const EdgeInsets.only(
-              left: 10,
-              top: 5,
-              bottom: 5,
-              right: 5
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                ClassOutlinedButton.createImage(() {
-                  if (_selectedOrderDishIndex < 0) {
-                    return;
-                  }
-                  final ClassOrderDish co = _orderDishes.elementAt(_selectedOrderDishIndex);
-                  if (co.qtyprint > 0) {
-                    SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_add_dish_to_order);
-                    m.addString(widget.table.orderid!);
-                    m.addInt(co.dishid);
-                    m.addDouble(co.price);
-                    m.addInt(co.storeid);
-                    m.addString(co.print1);
-                    m.addString(co.print2);
-                    sendSocketMessage(m);
-                    return;
-                  }
-
-                  SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_modify_order_dish);
-                  m.addString(co.id);
-                  m.addDouble(co.qty + 1);
-                  m.addString(co.comment);
-                  sendSocketMessage(m);
-                }, "images/plus.png", h: 48, w: 48),
-                ClassOutlinedButton.createImage(() {
-                  if (_selectedOrderDishIndex < 0) {
-                    return;
-                  }
-                  final ClassOrderDish co = _orderDishes.elementAt(_selectedOrderDishIndex);
-                  if (co.qty <= 1 && co.qtyprint < 0.01) {
-                    SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_remove_dish_from_order);
-                    m.addString(co.id);
-                    sendSocketMessage(m);
-                    return;
-                  }
-                  if (co.qty > 1 && co.qtyprint < 0.01) {
-                    SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_modify_order_dish);
-                    m.addString(co.id);
-                    m.addDouble(co.qty - 1);
-                    m.addString(co.comment);
-                    sendSocketMessage(m);
-                  }
-                }, "images/minus.png", h: 48, w: 48),
-                ClassOutlinedButton.createImage(() {
-                  if (_selectedOrderDishIndex < 0) {
-                    return;
-                  }
-                  final ClassOrderDish co = _orderDishes.elementAt(_selectedOrderDishIndex);
-                  if (co.qty <= 0.5 && co.qtyprint < 0.01) {
-                    SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_remove_dish_from_order);
-                    m.addString(co.id);
-                    sendSocketMessage(m);
-                    return;
-                  }
-                  if (co.qty > 0.5 && co.qtyprint < 0.01) {
-                    SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_modify_order_dish);
-                    m.addString(co.id);
-                    m.addDouble(co.qty - 0.5);
-                    m.addString(co.comment);
-                    sendSocketMessage(m);
-                  }
-                }, "images/half.png", h: 48, w: 48),
-                ClassOutlinedButton.createImage(() {
-                  if (_selectedOrderDishIndex < 0) {
-                    return;
-                  }
-                  final ClassOrderDish co = _orderDishes.elementAt(_selectedOrderDishIndex);
-                  if (co.qtyprint > 0.01) {
-                    return;
-                  }
-                  if (co.qty > 0.01) {
-                    Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => WidgetDishComment(co.dishid, co.comment))).then((value) {
-                      if (value == null) {
-                        return;
-                      }
-                      setState((){
-                        co.comment = value;
-                      });
-                      SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_modify_order_dish);
-                      m.addString(co.id);
-                      m.addDouble(co.qty);
-                      m.addString(co.comment);
-                      sendSocketMessage(m);
-                    });
-                  }
-                }, "images/message.png", h: 48, w: 48),
-
-                ClassOutlinedButton.createImage(() {
-                  if (widget.table.orderid == null || widget.table.orderid!.isEmpty) {
-                    return;
-                  }
-                  bool found = false;
-                  for (ClassOrderDish co in _orderDishes) {
-                    if (co.qtyprint < 0.01) {
-                      found = true;
-                      break;
-                    }
-                  }
-                  if (found) {
-                    sq(tr("Print order"), () {
-                      SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_print_service);
-                      m.addString(widget.table.orderid!);
-                      sendSocketMessage(m);
-                    }, () {});
-                  }
-                }, "images/printer.png", h: 48, w: 48),
-                Expanded(
-                    child: Container(
-                      color: Colors.green,
+              Column(mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Visibility(
+                    visible: _dataErrorString.isNotEmpty,
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Text(_dataErrorString),
                     )),
-                Visibility (
-                visible: Config.getInt(key_protocol_version) != 3,
-                child: ClassOutlinedButton.createImage(() {
-                  if (widget.table.orderid == null || widget.table.orderid!.isEmpty) {
-                    return;
-                  }
-                  bool found = false;
-                  for (ClassOrderDish co in _orderDishes) {
-                    if (co.qtyprint < 0.01) {
-                      found = true;
-                      break;
-                    }
-                  }
-                  if (!found) {
-                    sq(tr("Print bill"), () {
-                      SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_print_bill);
-                      m.addString(widget.table.orderid!);
-                      sendSocketMessage(m);
-                    }, () {});
-                  } else {
-                    sd(tr("Order is not completed"));
-                  }
-                }, "images/bill.png", h: 48, w: 48))
-              ],
-            ))
-      ]),
-      _orderMenu()
-    ])));
+                Row(children: [
+                  ClassOutlinedButton.createImage(() {
+                    SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_unlock_table);
+                    m.addInt(widget.table.id);
+                    m.addString(Config.getString(key_session_id));
+                    sendSocketMessage(m);
+                  }, "images/back.png"),
+                  Expanded(child: Container()),
+                  Row(children: [Text(widget.table.name, style: const TextStyle(fontWeight: FontWeight.bold)), const Text(", "), Text(widget.table.owner.isEmpty ? Config.getString(key_fullname) : widget.table.owner, style: const TextStyle(fontWeight: FontWeight.bold))]),
+                  Expanded(child: Container()),
+                  Container(
+                      width: 36,
+                      height: 36,
+                      margin: const EdgeInsets.only(left: 5, right: 5),
+                      child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.all(2),
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _hideMenu = false;
+                              _startx = 0;
+                            });
+                          },
+                          child: Image.asset("images/menu.png", width: 36, height: 36))),
+                ]),
+                Container(
+                  color: Colors.blueGrey,
+                  height: 5,
+                ),
+                Visibility(
+                  visible: Config.getInt(key_protocol_version) == 3,
+                  child: Row(children: [
+                    Expanded(
+                        child: Container(
+                            margin: const EdgeInsets.only(left: 5, top: 2, right: 5),
+                            height: 36,
+                            child: OutlinedButton(
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.only(left: 5),
+                                ),
+                                onPressed: () async {
+                                  Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => WidgetSetCar(table: widget.table))).then((result) {
+                                    if (result == null) {
+                                      return;
+                                    }
+                                    setState(() {
+                                      widget.table = result;
+                                    });
+                                  });
+                                },
+                                child: Row(children: [
+                                  Image.asset("images/car.png"),
+                                  Expanded(child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: Container(margin: const EdgeInsets.only(left: 5), child: Text(_getCarTitle())))),
+                                ])))),
+                    ClassOutlinedButton.createImage(() {
+                      if (widget.table.customer != null) {
+                        launchUrl(Uri(scheme: "tel", path: widget.table.customer!.phone));
+                      }
+                    }, "images/call.png")
+                  ]),
+                ),
+                Expanded(child: _orderDishesTable()),
+                Container(
+                    padding: const EdgeInsets.only(left: 10, top: 5, bottom: 5, right: 5),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        ClassOutlinedButton.createImage(() {
+                          if (_selectedOrderDishIndex < 0) {
+                            return;
+                          }
+                          final ClassOrderDish co = _orderDishes.elementAt(_selectedOrderDishIndex);
+                          if (co.qtyprint > 0) {
+                            SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_add_dish_to_order);
+                            m.addString(widget.table.orderid!);
+                            m.addInt(co.dishid);
+                            m.addDouble(co.price);
+                            m.addInt(co.storeid);
+                            m.addString(co.print1);
+                            m.addString(co.print2);
+                            sendSocketMessage(m);
+                            return;
+                          }
+
+                          SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_modify_order_dish);
+                          m.addString(co.id);
+                          m.addDouble(co.qty + 1);
+                          m.addString(co.comment);
+                          sendSocketMessage(m);
+                        }, "images/plus.png", h: 48, w: 48),
+                        ClassOutlinedButton.createImage(() {
+                          if (_selectedOrderDishIndex < 0) {
+                            return;
+                          }
+                          final ClassOrderDish co = _orderDishes.elementAt(_selectedOrderDishIndex);
+                          if (co.qty <= 1 && co.qtyprint < 0.01) {
+                            SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_remove_dish_from_order);
+                            m.addString(co.id);
+                            sendSocketMessage(m);
+                            return;
+                          }
+                          if (co.qty > 1 && co.qtyprint < 0.01) {
+                            SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_modify_order_dish);
+                            m.addString(co.id);
+                            m.addDouble(co.qty - 1);
+                            m.addString(co.comment);
+                            sendSocketMessage(m);
+                          }
+                        }, "images/minus.png", h: 48, w: 48),
+                        ClassOutlinedButton.createImage(() {
+                          if (_selectedOrderDishIndex < 0) {
+                            return;
+                          }
+                          final ClassOrderDish co = _orderDishes.elementAt(_selectedOrderDishIndex);
+                          if (co.qty <= 0.5 && co.qtyprint < 0.01) {
+                            SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_remove_dish_from_order);
+                            m.addString(co.id);
+                            sendSocketMessage(m);
+                            return;
+                          }
+                          if (co.qty > 0.5 && co.qtyprint < 0.01) {
+                            SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_modify_order_dish);
+                            m.addString(co.id);
+                            m.addDouble(co.qty - 0.5);
+                            m.addString(co.comment);
+                            sendSocketMessage(m);
+                          }
+                        }, "images/half.png", h: 48, w: 48),
+                        ClassOutlinedButton.createImage(() {
+                          if (_selectedOrderDishIndex < 0) {
+                            return;
+                          }
+                          final ClassOrderDish co = _orderDishes.elementAt(_selectedOrderDishIndex);
+                          if (co.qtyprint > 0.01) {
+                            return;
+                          }
+                          if (co.qty > 0.01) {
+                            Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => WidgetDishComment(co.dishid, co.comment))).then((value) {
+                              if (value == null) {
+                                return;
+                              }
+                              setState(() {
+                                co.comment = value;
+                              });
+                              SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_modify_order_dish);
+                              m.addString(co.id);
+                              m.addDouble(co.qty);
+                              m.addString(co.comment);
+                              sendSocketMessage(m);
+                            });
+                          }
+                        }, "images/message.png", h: 48, w: 48),
+                        ClassOutlinedButton.createImage(() {
+                          if (widget.table.orderid == null || widget.table.orderid!.isEmpty) {
+                            return;
+                          }
+                          bool found = false;
+                          for (ClassOrderDish co in _orderDishes) {
+                            if (co.qtyprint < 0.01) {
+                              found = true;
+                              break;
+                            }
+                          }
+                          if (found) {
+                            sq(tr("Print order"), () {
+                              SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_print_service);
+                              m.addString(widget.table.orderid!);
+                              sendSocketMessage(m);
+                            }, () {});
+                          }
+                        }, "images/printer.png", h: 48, w: 48),
+                        Expanded(
+                            child: Container(
+                          color: Colors.green,
+                        )),
+                        Visibility(
+                            visible: Config.getInt(key_protocol_version) != 3,
+                            child: ClassOutlinedButton.createImage(() {
+                              if (widget.table.orderid == null || widget.table.orderid!.isEmpty) {
+                                return;
+                              }
+                              bool found = false;
+                              for (ClassOrderDish co in _orderDishes) {
+                                if (co.qtyprint < 0.01) {
+                                  found = true;
+                                  break;
+                                }
+                              }
+                              if (!found) {
+                                sq(tr("Print bill"), () {
+                                  SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_print_bill);
+                                  m.addString(widget.table.orderid!);
+                                  sendSocketMessage(m);
+                                }, () {});
+                              } else {
+                                sd(tr("Order is not completed"));
+                              }
+                            }, "images/bill.png", h: 48, w: 48))
+                      ],
+                    ))
+              ]),
+              _orderMenu()
+            ])));
   }
 
   Widget _orderDishesTable() {
@@ -470,46 +466,45 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                         border: Border(top: BorderSide(color: Color(0xffa0a0a0))),
                       ),
                       child: Row(
-                    children: [
-                      Container(
-                          width: 40,
-                          margin: const EdgeInsets.only(top: 2),
-                          child: Align(
-                              alignment: Alignment.center,
-                              child: Text(
-                                num(co.qty),
-                                style: const TextStyle(fontSize: 14, ),
-                              ))),
-                      Container(
-                          width: 250,
-                          height: co.comment.isEmpty ? 30 : 50,
-                          margin: const EdgeInsets.only(top: 2),
-                          child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                  children:[Text(ClassDish.map[co.dishid]!.name,
-                                  textAlign: TextAlign.start,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                  ),
-                              ),
-                              Visibility(
-                                visible: co.comment.isNotEmpty,
-                                child: Text(co.comment)
-                              )
-                              ]))),
-                      Container(
-                          margin: const EdgeInsets.only(top: 2),
-                          child: Align(
-                              alignment: Alignment.center,
-                              child: Text(
-                                num(co.price * co.qty),
-                                style: const TextStyle(fontSize: 14),
-                              )))
-                    ],
-                  ))));
+                        children: [
+                          Container(
+                              width: 40,
+                              margin: const EdgeInsets.only(top: 2),
+                              child: Align(
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    num(co.qty),
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                    ),
+                                  ))),
+                          Container(
+                              width: 250,
+                              height: co.comment.isEmpty ? 30 : 50,
+                              margin: const EdgeInsets.only(top: 2),
+                              child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                    Text(
+                                      ClassDish.map[co.dishid]!.name,
+                                      textAlign: TextAlign.start,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                    Visibility(visible: co.comment.isNotEmpty, child: Text(co.comment))
+                                  ]))),
+                          Container(
+                              margin: const EdgeInsets.only(top: 2),
+                              child: Align(
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    num(co.price * co.qty),
+                                    style: const TextStyle(fontSize: 14),
+                                  )))
+                        ],
+                      ))));
         });
   }
 
@@ -565,51 +560,61 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            Row(
-                              children: [
-                                ClassOutlinedButton.createImage(() {
-                                  setState(() {
-                                    if (_menuType == _prevMenuType) {
-                                      _hideOrderMenu();
-                                    } else {
-                                      _menuType = _prevMenuType;
-                                    }
-                                  });
-                                }, "images/back.png"),
-                                Visibility(visible: !_searchVisible, child: Expanded(child: Container())),
-                                Visibility(visible: !_searchVisible, child: ClassOutlinedButton.createImage(() {
-                                  setState(() {
-                                    _searchVisible = true;
-                                  });
-                                }, "images/search.png")),
-                                Visibility(visible: _searchVisible, child: Row(
-                                    children: [ Container(
-                                      width: 120,
-                                  margin: const EdgeInsets.only(left: 3, right: 3),
-                                  child: TextField(
-                                    autofocus: true,
-                                    onChanged: (txt){
-                                      if (txt.length < 3 ){
-                                        _dishSearchFilter = "";
-                                        return;
-                                      }
-                                      setState(() {
-                                        _menuType = 2;
-                                        _dishSearchFilter = txt;
-                                      });
-                                    },
-                                  )
-                                ),
-                                ClassOutlinedButton.createImage(() {
-                                  setState(() {
-                                    _menuType = 1;
-                                    _part1Filter = 0;
-                                    _dishSearchFilter = "";
-                                    _searchVisible = false;
-                                  });
-                                }, "images/cancel.png")
-                              ]),
-                            )]),
+                            Row(children: [
+                              ClassOutlinedButton.createImage(() {
+                                setState(() {
+                                  if (_menuType == _prevMenuType) {
+                                    _hideOrderMenu();
+                                  } else {
+                                    _menuType = _prevMenuType;
+                                  }
+                                });
+                              }, "images/back.png"),
+                              Visibility(visible: !_searchVisible, child: Expanded(child: Container())),
+                              Visibility(
+                                  visible: !_searchVisible,
+                                  child: ClassOutlinedButton.createImage(() {
+                                    setState(() {
+                                      _prevMenuType = _menuType;
+                                      _menuType = 3;
+                                    });
+                                  }, "images/favorite.png")),
+                              Visibility(
+                                  visible: !_searchVisible,
+                                  child: ClassOutlinedButton.createImage(() {
+                                    setState(() {
+                                      _searchVisible = true;
+                                    });
+                                  }, "images/search.png")),
+                              Visibility(
+                                visible: _searchVisible,
+                                child: Row(children: [
+                                  SizedBox(
+                                      width: 150,
+                                      child: TextField(
+                                        autofocus: true,
+                                        onChanged: (txt) {
+                                          if (txt.length < 3) {
+                                            _dishSearchFilter = "";
+                                            return;
+                                          }
+                                          setState(() {
+                                            _menuType = 2;
+                                            _dishSearchFilter = txt;
+                                          });
+                                        },
+                                      )),
+                                  ClassOutlinedButton.createImage(() {
+                                    setState(() {
+                                      _menuType = 1;
+                                      _part1Filter = 0;
+                                      _dishSearchFilter = "";
+                                      _searchVisible = false;
+                                    });
+                                  }, "images/cancel.png")
+                                ]),
+                              )
+                            ]),
                             Container(
                               height: 2,
                             ),
@@ -623,7 +628,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
         ));
   }
 
-  Widget _dishes() {
+  Widget _dishes(bool quick) {
     ClassHall? h = ClassHall.getHall(widget.table.hallid);
     if (h == null) {
       return const Text("Hall is null");
@@ -641,32 +646,21 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
     for (int i = 0; i < ClassMenuDish.list.length; i++) {
       final ClassMenuDish md = ClassMenuDish.list.elementAt(i);
       final ClassDish cd = ClassDish.map[md.dishid]!;
-      if (_dishSearchFilter.isNotEmpty) {
-        if (h.menu != md.menuid || !cd.name.toLowerCase().contains(_dishSearchFilter.toLowerCase())) {
+      if (quick) {
+        if (cd.quicklist == 0) {
           continue;
         }
-      } else if (_selectedType != md.typeid || h.menu != md.menuid) {
-        continue;
+      } else {
+        if (_dishSearchFilter.isNotEmpty) {
+          if (h.menu != md.menuid || !cd.name.toLowerCase().contains(_dishSearchFilter.toLowerCase())) {
+            continue;
+          }
+        } else if (_selectedType != md.typeid || h.menu != md.menuid) {
+          continue;
+        }
       }
 
-      DataCell dc = DataCell(
-          Container(
-              margin: const EdgeInsets.only(top: 2),
-              color: cd.bgColor,
-              width: _menuWidth / colCount,
-              child: Align(
-                  alignment: Alignment.center,
-                  child: Column(mainAxisAlignment: MainAxisAlignment.start, mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Expanded(
-                        child: Text(cd.name.toUpperCase(),
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: cd.textColor,
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold
-                            ))),
-                    Container(width: double.infinity, height: 20, decoration: BoxDecoration(border: Border.all(color: Colors.blueAccent), color: Colors.white), child: Text(textAlign: TextAlign.center, "${md.price}", style: const TextStyle(fontWeight: FontWeight.bold)))
-                  ]))), onTap: () async {
+      DataCell dc = DataCell(Container(margin: const EdgeInsets.only(top: 2), color: cd.bgColor, width: _menuWidth / colCount, child: Align(alignment: Alignment.center, child: Column(mainAxisAlignment: MainAxisAlignment.start, mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.start, children: [Expanded(child: Text(cd.name.toUpperCase(), textAlign: TextAlign.center, style: TextStyle(color: cd.textColor, fontSize: 13, fontWeight: FontWeight.bold))), Container(width: double.infinity, height: 20, decoration: BoxDecoration(border: Border.all(color: Colors.blueAccent), color: Colors.white), child: Text(textAlign: TextAlign.center, "${md.price}", style: const TextStyle(fontWeight: FontWeight.bold)))]))), onTap: () async {
         md.dish = cd;
         if (ClassDishesSpecialCommentDlg.specialCommentForDish(md.dishid)) {
           String? comment = await ClassDishesSpecialCommentDlg.getComment(context, md.dishid, cd.name);
@@ -713,27 +707,30 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
     if (ClassDishPart1.list.isEmpty) {
       return Container();
     }
-    return SizedBox(height: 30, child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: ClassDishPart1.list.length,
-        shrinkWrap: true,
-        itemBuilder: (BuildContext context, int index)
-    {
-      final ClassDishPart1 co = ClassDishPart1.list.elementAt(index);
-      return GestureDetector(
-          child: Container(
-            margin: const EdgeInsets.only(right: 3),
-            color: Colors.black12,
-            height: 30, width: 100, child: Align(alignment: Alignment.center,
-              child: Text(co.name, style: const TextStyle(fontWeight: FontWeight.bold))),),
-          onTap: () {
-            setState(() {
-              _menuType = 1;
-              _part1Filter = co.id;
-            });
-        },
-      );
-    }));
+    return SizedBox(
+        height: 30,
+        child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: ClassDishPart1.list.length,
+            shrinkWrap: true,
+            itemBuilder: (BuildContext context, int index) {
+              final ClassDishPart1 co = ClassDishPart1.list.elementAt(index);
+              return GestureDetector(
+                child: Container(
+                  margin: const EdgeInsets.only(right: 3),
+                  color: Colors.black12,
+                  height: 30,
+                  width: 100,
+                  child: Align(alignment: Alignment.center, child: Text(co.name, style: const TextStyle(fontWeight: FontWeight.bold))),
+                ),
+                onTap: () {
+                  setState(() {
+                    _menuType = 1;
+                    _part1Filter = co.id;
+                  });
+                },
+              );
+            }));
   }
 
   Widget _part2(int level) {
@@ -743,13 +740,13 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
     }
 
     List<int> p1 = [];
-      for (ClassDishPart2 p in ClassDishPart2.list) {
-        if (_part1Filter > 0 && p.part1 != _part1Filter) {
-          continue;
-        }
-        p1.add(p.id);
+    for (ClassDishPart2 p in ClassDishPart2.list) {
+      if (_part1Filter > 0 && p.part1 != _part1Filter) {
+        continue;
+      }
+      p1.add(p.id);
     }
-    
+
     int colCount = 2;
     List<DataColumn> columns = [];
     for (int i = 0; i < colCount; i++) {
@@ -808,7 +805,9 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
       case 1:
         return _part2(0);
       case 2:
-        return _dishes();
+        return _dishes(false);
+      case 3:
+        return _dishes(true);
     }
     return const Text("No menu type selected");
   }
@@ -821,7 +820,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
     });
   }
 
-  void _sendDishToServer(ClassMenuDish md){
+  void _sendDishToServer(ClassMenuDish md) {
     SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_add_dish_to_order);
     m.addString(widget.table.orderid!);
     m.addInt(md.dish!.id);

@@ -31,11 +31,15 @@ class ClassDishesSpecialCommentDlg {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(tr('Dish required comment')),
-          content: SizedBox(
+          content: Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: const Color(0xffeaeaea))
+            ),
             height: 300,
         width: 300,
         child: Column (
-            children: _comments(context, dishid)
+            children: _comments(context, dishid),
+
           )),
           actions: [
             TextButton(
@@ -61,7 +65,11 @@ class ClassDishesSpecialCommentDlg {
             onTap: (){
               Navigator.of(c).pop(s);
             },
-            child: SizedBox(
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 2, top: 2),
+              decoration: BoxDecoration(
+                border: Border.all(color: const Color(0xffeaeaea)),
+              ) ,
                 width: 200,
                 height: 50,
                 child: Align(
@@ -71,6 +79,7 @@ class ClassDishesSpecialCommentDlg {
         ));
       }
     }
+    w.add(Expanded(child: Container()));
     return w;
   }
 
