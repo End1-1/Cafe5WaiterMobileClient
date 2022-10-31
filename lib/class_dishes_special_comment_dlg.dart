@@ -30,7 +30,7 @@ class ClassDishesSpecialCommentDlg {
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(tr('Dish required comment')),
+          title: Align(alignment: Alignment.center, child: Text(tr('Comment for ')  + '\r\n' + msg)),
           content: Container(
             decoration: BoxDecoration(
               border: Border.all(color: const Color(0xffeaeaea))

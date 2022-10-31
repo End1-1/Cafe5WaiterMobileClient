@@ -80,7 +80,7 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
       int op = m.getInt();
       int dllok = m.getByte();
       if (dllok == 0) {
-        sd(m.getString());
+        sd(tr(m.getString()));
         return;
       }
       switch (op) {

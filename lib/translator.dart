@@ -22,6 +22,8 @@ const Map<String, String> vals = {
   'confirm to logout': 'Հաստատեք ելքը',
   'dish required comment': 'Ուտեստի պարտադիր մեկնաբանություն',
   'cancel': 'Հրաժարվել',
+  'quantity of ' : 'Քանակ',
+  'comment for' : 'Մեկնաբանություն'
 };
 
 String tr(String s) {

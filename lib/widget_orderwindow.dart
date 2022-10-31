@@ -23,6 +23,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'class_dishes_special_comment_dlg.dart';
+import 'class_set_qty_dlg.dart';
 
 class WidgetOrderWindow extends StatefulWidget {
   ClassTable table;
@@ -350,24 +351,35 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                             sendSocketMessage(m);
                           }
                         }, "images/minus.png", h: 48, w: 48),
-                        ClassOutlinedButton.createImage(() {
+                        ClassOutlinedButton.createImage(() async {
                           if (_selectedOrderDishIndex < 0) {
                             return;
                           }
                           final ClassOrderDish co = _orderDishes.elementAt(_selectedOrderDishIndex);
-                          if (co.qty <= 0.5 && co.qtyprint < 0.01) {
+                          if (co.qtyprint > 0.01) {
+                            return;
+                          }
+                          var qty = await ClassSetQtyDlg.getQty(context, ClassDish.map[co.dishid]!.name);
+                          if (qty == null) {
+                            return;
+                          }
+                          if (qty == -1000) {
                             SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_remove_dish_from_order);
                             m.addString(co.id);
                             sendSocketMessage(m);
                             return;
                           }
-                          if (co.qty > 0.5 && co.qtyprint < 0.01) {
-                            SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_modify_order_dish);
-                            m.addString(co.id);
-                            m.addDouble(co.qty - 0.5);
-                            m.addString(co.comment);
-                            sendSocketMessage(m);
+                          if (qty < 0) {
+                            co.qty += qty * -1;
+                          } else {
+                            co.qty = qty!;
                           }
+                          SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_modify_order_dish);
+                          m.addString(co.id);
+                          m.addDouble(co.qty);
+                          m.addString(co.comment);
+                          sendSocketMessage(m);
+
                         }, "images/half.png", h: 48, w: 48),
                         ClassOutlinedButton.createImage(() {
                           if (_selectedOrderDishIndex < 0) {
