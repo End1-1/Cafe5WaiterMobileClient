@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
-import 'package:cafe5_waiter_mobile_client/base_widget.dart';
+import 'package:cafe5_shop_mobile_client/base_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:cafe5_waiter_mobile_client/translator.dart';
-import 'package:cafe5_waiter_mobile_client/config.dart';
-import 'package:cafe5_waiter_mobile_client/widget_tables.dart';
-import 'package:cafe5_waiter_mobile_client/class_hall.dart';
+import 'package:cafe5_shop_mobile_client/translator.dart';
+import 'package:cafe5_shop_mobile_client/config.dart';
+import 'package:cafe5_shop_mobile_client/widget_tables.dart';
+import 'package:cafe5_shop_mobile_client/class_hall.dart';
 
 class WidgetHalls extends StatefulWidget {
   @override

@@ -1,18 +1,18 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:cafe5_waiter_mobile_client/home_page.dart';
-import 'package:cafe5_waiter_mobile_client/network_table.dart';
-import 'package:cafe5_waiter_mobile_client/socket_message.dart';
+import 'package:cafe5_shop_mobile_client/home_page.dart';
+import 'package:cafe5_shop_mobile_client/network_table.dart';
+import 'package:cafe5_shop_mobile_client/socket_message.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:cafe5_waiter_mobile_client/base_widget.dart';
+import 'package:cafe5_shop_mobile_client/base_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:cafe5_waiter_mobile_client/translator.dart';
-import 'package:cafe5_waiter_mobile_client/config.dart';
-import 'package:cafe5_waiter_mobile_client/db.dart';
-import 'package:cafe5_waiter_mobile_client/class_table.dart';
-import 'package:cafe5_waiter_mobile_client/widget_orderwindow.dart';
-import 'package:cafe5_waiter_mobile_client/widget_halls.dart';
+import 'package:cafe5_shop_mobile_client/translator.dart';
+import 'package:cafe5_shop_mobile_client/config.dart';
+import 'package:cafe5_shop_mobile_client/db.dart';
+import 'package:cafe5_shop_mobile_client/class_table.dart';
+import 'package:cafe5_shop_mobile_client/widget_orderwindow.dart';
+import 'package:cafe5_shop_mobile_client/widget_halls.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 import 'class_outlinedbutton.dart';

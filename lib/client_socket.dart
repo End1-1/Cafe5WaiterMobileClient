@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
-import 'package:cafe5_waiter_mobile_client/client_socket_interface.dart';
-import 'package:cafe5_waiter_mobile_client/socket_message.dart';
+import 'package:cafe5_shop_mobile_client/client_socket_interface.dart';
+import 'package:cafe5_shop_mobile_client/socket_message.dart';
 
 class ClientSocket {
 
@@ -34,7 +34,7 @@ class ClientSocket {
       _socket!.destroy();
     }
     print("${DateTime.now()} Connect to ${socket.remoteAddress}:${socket.remotePort}");
-    await SecureSocket.connect(socket.remoteAddress, socket.remotePort, timeout: Duration(seconds: 10), onBadCertificate: (x){return true;}).then((s) {
+    await SecureSocket.connect(socket.remoteAddress, socket.remotePort, timeout: Duration(seconds: 3), onBadCertificate: (x){return true;}).then((s) {
       print("${DateTime.now()} Socket connected ${s.hashCode}");
       _socket = s;
       _listenSocket();
@@ -93,7 +93,7 @@ class ClientSocket {
   }
 
   Future<bool> _reconnectToServer() async {
-    const int sec = 5;
+    const int sec = 2;
     print("Wait $sec second");
     await Future.delayed(const Duration(seconds: sec));
     print("Socket reconnecting... ${_socket.hashCode}");

@@ -1,12 +1,12 @@
 import 'dart:typed_data';
-import 'package:cafe5_waiter_mobile_client/widget_manual_settings.dart';
+import 'package:cafe5_shop_mobile_client/widget_manual_settings.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter/material.dart';
-import 'package:cafe5_waiter_mobile_client/translator.dart';
-import 'package:cafe5_waiter_mobile_client/config.dart';
-import 'package:cafe5_waiter_mobile_client/base_widget.dart';
-import 'package:cafe5_waiter_mobile_client/socket_message.dart';
-import 'package:cafe5_waiter_mobile_client/home_page.dart';
+import 'package:cafe5_shop_mobile_client/translator.dart';
+import 'package:cafe5_shop_mobile_client/config.dart';
+import 'package:cafe5_shop_mobile_client/base_widget.dart';
+import 'package:cafe5_shop_mobile_client/socket_message.dart';
+import 'package:cafe5_shop_mobile_client/home_page.dart';
 
 import 'client_socket.dart';
 

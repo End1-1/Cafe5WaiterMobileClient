@@ -1,6 +1,6 @@
 
-import 'package:cafe5_waiter_mobile_client/class_car_model.dart';
-import 'package:cafe5_waiter_mobile_client/class_customer.dart';
+import 'package:cafe5_shop_mobile_client/class_car_model.dart';
+import 'package:cafe5_shop_mobile_client/class_customer.dart';
 
 class ClassTable {
   int id;

@@ -1,4 +1,6 @@
 const Map<String, String> vals = {
+  'yes':'Այո',
+  'no': 'Ոչ',
   'sign in':'Մուտք',
   'login':'Մուտք',
   'username or password incorrect':'Գաղտնաբառը կամ օգտագործողը սխալ է',
@@ -23,7 +25,8 @@ const Map<String, String> vals = {
   'dish required comment': 'Ուտեստի պարտադիր մեկնաբանություն',
   'cancel': 'Հրաժարվել',
   'quantity of ' : 'Քանակ',
-  'comment for' : 'Մեկնաբանություն'
+  'comment for' : 'Մեկնաբանություն',
+  'print bill': 'Տպել հաշիվը'
 };
 
 String tr(String s) {

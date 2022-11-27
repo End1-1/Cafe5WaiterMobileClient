@@ -1,4 +1,4 @@
-import 'package:cafe5_waiter_mobile_client/db.dart';
+import 'package:cafe5_shop_mobile_client/db.dart';
 
 class ClassHall {
   int id;

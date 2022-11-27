@@ -1,11 +1,11 @@
 import 'dart:typed_data';
-import 'package:cafe5_waiter_mobile_client/class_outlinedbutton.dart';
+import 'package:cafe5_shop_mobile_client/class_outlinedbutton.dart';
 
-import 'package:cafe5_waiter_mobile_client/class_dish_comment.dart';
-import 'package:cafe5_waiter_mobile_client/translator.dart';
-import 'package:cafe5_waiter_mobile_client/base_widget.dart';
-import 'package:cafe5_waiter_mobile_client/socket_message.dart';
-import 'package:cafe5_waiter_mobile_client/widget_dish_manual_comment.dart';
+import 'package:cafe5_shop_mobile_client/class_dish_comment.dart';
+import 'package:cafe5_shop_mobile_client/translator.dart';
+import 'package:cafe5_shop_mobile_client/base_widget.dart';
+import 'package:cafe5_shop_mobile_client/socket_message.dart';
+import 'package:cafe5_shop_mobile_client/widget_dish_manual_comment.dart';
 import 'package:flutter/material.dart';
 
 class WidgetDishComment extends StatefulWidget {
