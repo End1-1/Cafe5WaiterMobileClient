@@ -74,7 +74,7 @@ class NetworkTable {
   }
 
   bool isEmpty() {
-    return strings.length == 0;
+    return strings.isEmpty;
   }
 
   String getDisplayData(int r, int c) {

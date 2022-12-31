@@ -17,7 +17,7 @@ import 'package:cafe5_waiter_mobile_client/widget_tables.dart';
 class WidgetSetCar extends StatefulWidget {
   final ClassTable table;
 
-  WidgetSetCar({required this.table});
+  const WidgetSetCar({required this.table});
 
   @override
   State<StatefulWidget> createState() {
@@ -29,12 +29,12 @@ class WidgetSetCarState extends BaseWidgetState<WidgetSetCar> {
 
   ClassCarModel? _carModel;
   ClassCustomer? _customer;
-  TextEditingController _carNameController = TextEditingController();
-  TextEditingController _plateController = TextEditingController();
-  TextEditingController _customerNameController = TextEditingController();
-  TextEditingController _customerPhoneController = TextEditingController();
-  FocusNode _carNameFocusNode = FocusNode();
-  GlobalKey _carNameKey = GlobalKey();
+  final TextEditingController _carNameController = TextEditingController();
+  final TextEditingController _plateController = TextEditingController();
+  final TextEditingController _customerNameController = TextEditingController();
+  final TextEditingController _customerPhoneController = TextEditingController();
+  final FocusNode _carNameFocusNode = FocusNode();
+  final GlobalKey _carNameKey = GlobalKey();
 
   @override
   void handler(Uint8List data) async {

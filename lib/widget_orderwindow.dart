@@ -148,6 +148,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
             for (ClassOrderDish co in _orderDishes) {
               if (co.id == recid) {
                 _orderDishes.remove(co);
+                _selectedOrderDishIndex = -1;
                 return;
               }
             }
@@ -247,7 +248,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                     sendSocketMessage(m);
                   }, "images/back.png"),
                   Expanded(child: Container()),
-                  Row(children: [Text(widget.table.name, style: const TextStyle(fontWeight: FontWeight.bold)), const Text(", "), Text(widget.table.owner.isEmpty ? Config.getString(key_fullname) : widget.table.owner, style: const TextStyle(fontWeight: FontWeight.bold))]),
+                  Row(children: [Text(widget.table.name, style: const TextStyle(fontWeight: FontWeight.bold)), const Text(", "), Text(widget.table.owner.isEmpty ? Config.getInt(key_protocol_version) == 3 ? "" : Config.getString(key_fullname) : widget.table.owner, style: const TextStyle(fontWeight: FontWeight.bold))]),
                   Expanded(child: Container()),
                   Container(
                       width: 36,

@@ -11,7 +11,7 @@ class ClassSetQtyDlg {
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(tr('Quantity of ')  + '\r\n'+ msg),
+          title: Text('${tr('Quantity of ')}\r\n$msg'),
           content: Container(
               padding: const EdgeInsets.only(top: 5),
               decoration: BoxDecoration(border: Border.all(color: const Color(0xffeaeaea))),

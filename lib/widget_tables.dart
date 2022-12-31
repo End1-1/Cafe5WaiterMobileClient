@@ -136,7 +136,7 @@ class WidgetTablesState extends BaseWidgetState<WidgetTables> {
                             },
                             child: Image.asset("images/back.png", width: 36, height: 36))),
                     Expanded(child: Container()),
-                    Text(Config.getString(key_fullname), style: const TextStyle(fontWeight: FontWeight.bold)),
+                    Text(Config.getInt(key_protocol_version) == 3 ? "" : Config.getString(key_fullname), style: const TextStyle(fontWeight: FontWeight.bold)),
                     Expanded(child: Container()),
                     ClassOutlinedButton.createImage(() {
                       Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => const WidgetReadyDishes()));

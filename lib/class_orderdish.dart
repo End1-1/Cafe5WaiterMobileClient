@@ -1,5 +1,4 @@
 class ClassOrderDish {
-
   String id;
   int dishid;
   double qty;
@@ -12,5 +11,5 @@ class ClassOrderDish {
   int storeid;
   String comment;
 
-  ClassOrderDish(this.id, this.dishid, this.qty, this.qtyprint, this.price, this.svcvalue, this.dctvalue, this.storeid, this.print1, this.print2, this.comment) ;
+  ClassOrderDish(this.id, this.dishid, this.qty, this.qtyprint, this.price, this.svcvalue, this.dctvalue, this.storeid, this.print1, this.print2, this.comment);
 }
