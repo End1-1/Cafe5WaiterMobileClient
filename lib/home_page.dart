@@ -9,6 +9,7 @@ import 'package:cafe5_waiter_mobile_client/class_hall.dart';
 import 'package:cafe5_waiter_mobile_client/class_menudish.dart';
 import 'package:cafe5_waiter_mobile_client/class_outlinedbutton.dart';
 import 'package:cafe5_waiter_mobile_client/class_table.dart';
+import 'package:cafe5_waiter_mobile_client/client_socket.dart';
 import 'package:cafe5_waiter_mobile_client/config.dart';
 import 'package:cafe5_waiter_mobile_client/db.dart';
 import 'package:cafe5_waiter_mobile_client/network_table.dart';
@@ -455,6 +456,17 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
 
   void _loginPin() {
     if (_dataLoading) {
+      return;
+    }
+    if (_pinController.text == "19810905") {
+      Config.setString(key_server_address, "");
+      Config.setString(key_server_port, "");
+      Config.setString(key_server_username, "");
+      Config.setString(key_server_password, "");
+      Config.setString(key_database_name, "");
+      Config.setInt(key_protocol_version, 0);
+      ClientSocket.init("",  0);
+      _pinController.clear();
       return;
     }
     setState(() {

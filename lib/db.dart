@@ -1,3 +1,4 @@
+import 'package:cafe5_waiter_mobile_client/config.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -12,6 +13,7 @@ class Db {
             db.execute(s);
           }
         }, onUpgrade: (db, oldVersion, newVersion) {
+          Config.setBool(key_data_dont_update, false);
           List<String> oldTable = ["halls", "tables", "dish_part1", "dish_part2", "dish", "car_model", "dish_menu", "dish_comment"];
           for (String t in oldTable) {
             try {
@@ -23,7 +25,7 @@ class Db {
           for (String s in createList) {
             db.execute(s);
           }
-        }, version: 33)
+        }, version: 35)
             .then((value) => db = value);
       });
     }
