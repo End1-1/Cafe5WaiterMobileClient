@@ -103,7 +103,7 @@ class WidgetChooseSettingsState extends BaseWidgetState<WidgetChooseSettings> {
                 alignment: Alignment.center,
                 child: TextButton(
                   onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => WidgetManualSettings()));
+                    Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => const WidgetManualSettings()));
                   },
                   child: Text(tr("Input manual")),
                 ),
