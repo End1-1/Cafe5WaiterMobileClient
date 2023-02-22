@@ -21,7 +21,8 @@ List<String> dbCreate = [
   "create table dish (id int, part2 int, bgcolor int, textcolor int, name text, q int, quicklist int)",
   "create table car_model (id int, name text)",
   "create table dish_comment (id int, forid int, name text)",
-  "create table dish_menu (id int, menuid int, typeid int, dishid int, price real, storeid int, print1 text, print2 text)"
+  "create table dish_menu (id int, menuid int, typeid int, dishid int, price real, storeid int, print1 text, print2 text)",
+  "create table menus (id int, name text)"
 ];
 
 final RegExp regex = RegExp(r'([.]*0)(?!.*\d)');

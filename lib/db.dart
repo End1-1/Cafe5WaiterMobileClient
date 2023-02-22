@@ -14,7 +14,7 @@ class Db {
           }
         }, onUpgrade: (db, oldVersion, newVersion) {
           Config.setBool(key_data_dont_update, false);
-          List<String> oldTable = ["halls", "tables", "dish_part1", "dish_part2", "dish", "car_model", "dish_menu", "dish_comment"];
+          List<String> oldTable = ["halls", "tables", "dish_part1", "dish_part2", "dish", "car_model", "dish_menu", "dish_comment", "menus"];
           for (String t in oldTable) {
             try {
               db.execute("drop table $t");
@@ -25,7 +25,7 @@ class Db {
           for (String s in createList) {
             db.execute(s);
           }
-        }, version: 35)
+        }, version: 36)
             .then((value) => db = value);
       });
     }

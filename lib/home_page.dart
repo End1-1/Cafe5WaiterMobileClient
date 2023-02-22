@@ -7,6 +7,7 @@ import 'package:cafe5_waiter_mobile_client/class_dishpart1.dart';
 import 'package:cafe5_waiter_mobile_client/class_dishpart2.dart';
 import 'package:cafe5_waiter_mobile_client/class_hall.dart';
 import 'package:cafe5_waiter_mobile_client/class_menudish.dart';
+import 'package:cafe5_waiter_mobile_client/class_menu.dart';
 import 'package:cafe5_waiter_mobile_client/class_outlinedbutton.dart';
 import 'package:cafe5_waiter_mobile_client/class_table.dart';
 import 'package:cafe5_waiter_mobile_client/client_socket.dart';
@@ -231,6 +232,20 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
             b.delete("car_model");
             for (int i = 0; i < nt.rowCount; i++) {
               b.insert("car_model", {'id': nt.getRawData(i, 0), 'name': nt.getRawData(i, 1)});
+            }
+            await b.commit();
+          });
+          m = SocketMessage.dllplugin(SocketMessage.op_get_menu_names);
+          sendSocketMessage(m);
+          break;
+        case SocketMessage.op_get_menu_names:
+          NetworkTable nt = NetworkTable();
+          nt.readFromSocketMessage(m);
+          await Db.db!.transaction((txn) async {
+            Batch b = txn.batch();
+            b.delete("menus");
+            for (int i = 0; i < nt.rowCount; i++) {
+              b.insert("menus", {'id': nt.getRawData(i, 0), 'name': nt.getRawData(i, 1)});
             }
             await b.commit();
           });
@@ -554,6 +569,14 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
         ClassDishComment.list.add(cm);
       });
       ClassDishesSpecialCommentDlg.init();
+    });
+
+    await Db.query("menus").then((map) {
+      ClassMenus.list.clear();
+      List.generate(map.length, (i) {
+        ClassMenus cm = ClassMenus(map[i]["id"], map[i]["name"]);
+        ClassMenus.list.add(cm);
+      });
     });
 
     print(DateTime.now());

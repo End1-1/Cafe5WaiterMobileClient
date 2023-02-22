@@ -4,6 +4,7 @@ import 'package:cafe5_waiter_mobile_client/base_widget.dart';
 import 'package:cafe5_waiter_mobile_client/class_car_model.dart';
 import 'package:cafe5_waiter_mobile_client/class_customer.dart';
 import 'package:cafe5_waiter_mobile_client/class_dish.dart';
+import 'package:cafe5_waiter_mobile_client/class_menu.dart';
 import 'package:cafe5_waiter_mobile_client/class_dishpart1.dart';
 import 'package:cafe5_waiter_mobile_client/class_dishpart2.dart';
 import 'package:cafe5_waiter_mobile_client/class_hall.dart';
@@ -46,13 +47,15 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
   double _menuWidth = 0;
   double _screenWidth = 0;
   int _menuType = 1;
+  int _menuId = 0;
   int _prevMenuType = 1;
   int _part1Filter = 0;
   String _dishSearchFilter = "";
   bool _searchVisible = false;
+  bool _selectMenu = false;
   int _selectedType = 0;
   int _selectedOrderDishIndex = -1;
-  List<ClassOrderDish> _orderDishes = [];
+  final List<ClassOrderDish> _orderDishes = [];
   final ScrollController _orderScrollController = ScrollController();
   ClassMenuDish? tempDish;
 
@@ -73,13 +76,23 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
       } catch (e) {
         print(e);
         await sd(tr("Data error"));
-        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (BuildContext context) => WidgetTables(hall: widget.table.hallid)), (route) => false);
+        Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+                builder: (BuildContext context) =>
+                    WidgetTables(hall: widget.table.hallid)),
+            (route) => false);
         return;
       }
       if (dllok == 0) {
         await sd(m.getString());
         if (op == SocketMessage.op_open_table) {
-          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (BuildContext context) => WidgetTables(hall: widget.table.hallid)), (route) => false);
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                  builder: (BuildContext context) =>
+                      WidgetTables(hall: widget.table.hallid)),
+              (route) => false);
         }
         return;
       }
@@ -94,12 +107,18 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
           }
           break;
         case SocketMessage.op_unlock_table:
-          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (BuildContext context) => WidgetTables(hall: widget.table.hallid)), (route) => false);
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                  builder: (BuildContext context) =>
+                      WidgetTables(hall: widget.table.hallid)),
+              (route) => false);
           break;
         case SocketMessage.op_get_car:
           widget.table.car = ClassCarModel.getCar(m.getInt());
           widget.table.car!.licensePlate = m.getString();
-          widget.table.customer = ClassCustomer(id: m.getInt(), name: m.getString(), phone: m.getString());
+          widget.table.customer = ClassCustomer(
+              id: m.getInt(), name: m.getString(), phone: m.getString());
           m = SocketMessage.dllplugin(SocketMessage.op_open_order);
           m.addString(widget.table.orderid!);
           sendSocketMessage(m);
@@ -137,9 +156,21 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
           break;
         case SocketMessage.op_add_dish_to_order:
           setState(() {
-            ClassOrderDish co = ClassOrderDish(m.getString(), m.getInt(), m.getDouble(), m.getDouble(), m.getDouble(), m.getDouble(), m.getDouble(), m.getInt(), m.getString(), m.getString(), m.getString());
+            ClassOrderDish co = ClassOrderDish(
+                m.getString(),
+                m.getInt(),
+                m.getDouble(),
+                m.getDouble(),
+                m.getDouble(),
+                m.getDouble(),
+                m.getDouble(),
+                m.getInt(),
+                m.getString(),
+                m.getString(),
+                m.getString());
             _orderDishes.add(co);
-            _orderScrollController.jumpTo(_orderScrollController.position.maxScrollExtent);
+            _orderScrollController
+                .jumpTo(_orderScrollController.position.maxScrollExtent);
           });
           break;
         case SocketMessage.op_remove_dish_from_order:
@@ -186,6 +217,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
   @override
   void initState() {
     super.initState();
+    _menuId = ClassHall.getHall(widget.table.hallid)!.menu;
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _screenWidth = MediaQuery.of(context).size.width;
       _menuWidth = _screenWidth - (_screenWidth / 3);
@@ -215,7 +247,8 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
         break;
 
       case AppLifecycleState.paused:
-        SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_unlock_table);
+        SocketMessage m =
+            SocketMessage.dllplugin(SocketMessage.op_unlock_table);
         m.addInt(widget.table.id);
         m.addString(Config.getString(key_session_id));
         sendSocketMessage(m);
@@ -233,206 +266,234 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
         body: SafeArea(
             minimum: const EdgeInsets.all(5),
             child: Stack(children: [
-              Column(mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Visibility(
-                    visible: _dataErrorString.isNotEmpty,
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: Text(_dataErrorString),
-                    )),
-                Row(children: [
-                  ClassOutlinedButton.createImage(() {
-                    SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_unlock_table);
-                    m.addInt(widget.table.id);
-                    m.addString(Config.getString(key_session_id));
-                    sendSocketMessage(m);
-                  }, "images/back.png"),
-                  Expanded(child: Container()),
-                  Row(children: [Text(widget.table.name, style: const TextStyle(fontWeight: FontWeight.bold)), const Text(", "), Text(widget.table.owner.isEmpty ? Config.getInt(key_protocol_version) == 3 ? "" : Config.getString(key_fullname) : widget.table.owner, style: const TextStyle(fontWeight: FontWeight.bold))]),
-                  Expanded(child: Container()),
-                  Container(
-                      width: 36,
-                      height: 36,
-                      margin: const EdgeInsets.only(left: 5, right: 5),
-                      child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.all(2),
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _hideMenu = false;
-                              _startx = 0;
-                            });
-                          },
-                          child: Image.asset("images/menu.png", width: 36, height: 36))),
-                ]),
-                Container(
-                  color: Colors.blueGrey,
-                  height: 5,
-                ),
-                Visibility(
-                  visible: Config.getInt(key_protocol_version) == 3,
-                  child: Row(children: [
-                    Expanded(
-                        child: Container(
-                            margin: const EdgeInsets.only(left: 5, top: 2, right: 5),
-                            height: 36,
-                            child: OutlinedButton(
-                                style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.only(left: 5),
-                                ),
-                                onPressed: () async {
-                                  Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => WidgetSetCar(table: widget.table))).then((result) {
-                                    if (result == null) {
-                                      return;
-                                    }
-                                    setState(() {
-                                      widget.table = result;
-                                    });
-                                  });
-                                },
-                                child: Row(children: [
-                                  Image.asset("images/car.png"),
-                                  Expanded(child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: Container(margin: const EdgeInsets.only(left: 5), child: Text(_getCarTitle())))),
-                                ])))),
-                    ClassOutlinedButton.createImage(() {
-                      if (widget.table.customer != null) {
-                        launchUrl(Uri(scheme: "tel", path: widget.table.customer!.phone));
-                      }
-                    }, "images/call.png")
-                  ]),
-                ),
-                Expanded(child: _orderDishesTable()),
-                Container(
-                    padding: const EdgeInsets.only(left: 10, top: 5, bottom: 5, right: 5),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
+              Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Visibility(
+                        visible: _dataErrorString.isNotEmpty,
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Text(_dataErrorString),
+                        )),
+                    Row(children: [
+                      ClassOutlinedButton.createImage(() {
+                        SocketMessage m = SocketMessage.dllplugin(
+                            SocketMessage.op_unlock_table);
+                        m.addInt(widget.table.id);
+                        m.addString(Config.getString(key_session_id));
+                        sendSocketMessage(m);
+                      }, "images/back.png"),
+                      Expanded(child: Container()),
+                      Row(children: [
+                        Text(widget.table.name,
+                            style:
+                                const TextStyle(fontWeight: FontWeight.bold)),
+                        const Text(", "),
+                        Text(
+                            widget.table.owner.isEmpty
+                                ? Config.getInt(key_protocol_version) == 3
+                                    ? ""
+                                    : Config.getString(key_fullname)
+                                : widget.table.owner,
+                            style: const TextStyle(fontWeight: FontWeight.bold))
+                      ]),
+                      Expanded(child: Container()),
+                      Container(
+                          width: 36,
+                          height: 36,
+                          margin: const EdgeInsets.only(left: 5, right: 5),
+                          child: OutlinedButton(
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.all(2),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _hideMenu = false;
+                                  _startx = 0;
+                                });
+                              },
+                              child: Image.asset("images/menu.png",
+                                  width: 36, height: 36))),
+                    ]),
+                    Container(
+                      color: Colors.blueGrey,
+                      height: 5,
+                    ),
+                    Visibility(
+                      visible: Config.getInt(key_protocol_version) == 3,
+                      child: Row(children: [
+                        Expanded(
+                            child: Container(
+                                margin: const EdgeInsets.only(
+                                    left: 5, top: 2, right: 5),
+                                height: 36,
+                                child: OutlinedButton(
+                                    style: OutlinedButton.styleFrom(
+                                      padding: const EdgeInsets.only(left: 5),
+                                    ),
+                                    onPressed: () async {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (BuildContext context) =>
+                                                  WidgetSetCar(
+                                                      table:
+                                                          widget.table))).then(
+                                          (result) {
+                                        if (result == null) {
+                                          return;
+                                        }
+                                        setState(() {
+                                          widget.table = result;
+                                        });
+                                      });
+                                    },
+                                    child: Row(children: [
+                                      Image.asset("images/car.png"),
+                                      Expanded(
+                                          child: SingleChildScrollView(
+                                              scrollDirection: Axis.horizontal,
+                                              child: Container(
+                                                  margin: const EdgeInsets.only(
+                                                      left: 5),
+                                                  child:
+                                                      Text(_getCarTitle())))),
+                                    ])))),
                         ClassOutlinedButton.createImage(() {
-                          if (_selectedOrderDishIndex < 0) {
-                            return;
+                          if (widget.table.customer != null) {
+                            launchUrl(Uri(
+                                scheme: "tel",
+                                path: widget.table.customer!.phone));
                           }
-                          final ClassOrderDish co = _orderDishes.elementAt(_selectedOrderDishIndex);
-                          if (co.qtyprint > 0) {
-                            SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_add_dish_to_order);
-                            m.addString(widget.table.orderid!);
-                            m.addInt(co.dishid);
-                            m.addDouble(co.price);
-                            m.addInt(co.storeid);
-                            m.addString(co.print1);
-                            m.addString(co.print2);
-                            sendSocketMessage(m);
-                            return;
-                          }
-
-                          SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_modify_order_dish);
-                          m.addString(co.id);
-                          m.addDouble(co.qty + 1);
-                          m.addString(co.comment);
-                          sendSocketMessage(m);
-                        }, "images/plus.png", h: 48, w: 48),
-                        ClassOutlinedButton.createImage(() {
-                          if (_selectedOrderDishIndex < 0) {
-                            return;
-                          }
-                          final ClassOrderDish co = _orderDishes.elementAt(_selectedOrderDishIndex);
-                          if (co.qty <= 1 && co.qtyprint < 0.01) {
-                            SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_remove_dish_from_order);
-                            m.addString(co.id);
-                            sendSocketMessage(m);
-                            return;
-                          }
-                          if (co.qty > 1 && co.qtyprint < 0.01) {
-                            SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_modify_order_dish);
-                            m.addString(co.id);
-                            m.addDouble(co.qty - 1);
-                            m.addString(co.comment);
-                            sendSocketMessage(m);
-                          }
-                        }, "images/minus.png", h: 48, w: 48),
-                        ClassOutlinedButton.createImage(() async {
-                          if (_selectedOrderDishIndex < 0) {
-                            return;
-                          }
-                          final ClassOrderDish co = _orderDishes.elementAt(_selectedOrderDishIndex);
-                          if (co.qtyprint > 0.01) {
-                            return;
-                          }
-                          var qty = await ClassSetQtyDlg.getQty(context, ClassDish.map[co.dishid]!.name);
-                          if (qty == null) {
-                            return;
-                          }
-                          if (qty == -1000) {
-                            SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_remove_dish_from_order);
-                            m.addString(co.id);
-                            sendSocketMessage(m);
-                            return;
-                          }
-                          if (qty < 0) {
-                            co.qty += qty * -1;
-                          } else {
-                            co.qty = qty!;
-                          }
-                          SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_modify_order_dish);
-                          m.addString(co.id);
-                          m.addDouble(co.qty);
-                          m.addString(co.comment);
-                          sendSocketMessage(m);
-
-                        }, "images/half.png", h: 48, w: 48),
-                        ClassOutlinedButton.createImage(() {
-                          if (_selectedOrderDishIndex < 0) {
-                            return;
-                          }
-                          final ClassOrderDish co = _orderDishes.elementAt(_selectedOrderDishIndex);
-                          if (co.qtyprint > 0.01) {
-                            return;
-                          }
-                          if (co.qty > 0.01) {
-                            Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => WidgetDishComment(co.dishid, co.comment))).then((value) {
-                              if (value == null) {
+                        }, "images/call.png")
+                      ]),
+                    ),
+                    Expanded(child: _orderDishesTable()),
+                    Container(
+                        padding: const EdgeInsets.only(
+                            left: 10, top: 5, bottom: 5, right: 5),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            ClassOutlinedButton.createImage(() {
+                              if (_selectedOrderDishIndex < 0) {
                                 return;
                               }
-                              setState(() {
-                                co.comment = value;
-                              });
-                              SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_modify_order_dish);
+                              final ClassOrderDish co = _orderDishes
+                                  .elementAt(_selectedOrderDishIndex);
+                              if (co.qtyprint > 0) {
+                                SocketMessage m = SocketMessage.dllplugin(
+                                    SocketMessage.op_add_dish_to_order);
+                                m.addString(widget.table.orderid!);
+                                m.addInt(co.dishid);
+                                m.addDouble(co.price);
+                                m.addInt(co.storeid);
+                                m.addString(co.print1);
+                                m.addString(co.print2);
+                                sendSocketMessage(m);
+                                return;
+                              }
+
+                              SocketMessage m = SocketMessage.dllplugin(
+                                  SocketMessage.op_modify_order_dish);
+                              m.addString(co.id);
+                              m.addDouble(co.qty + 1);
+                              m.addString(co.comment);
+                              sendSocketMessage(m);
+                            }, "images/plus.png", h: 48, w: 48),
+                            ClassOutlinedButton.createImage(() {
+                              if (_selectedOrderDishIndex < 0) {
+                                return;
+                              }
+                              final ClassOrderDish co = _orderDishes
+                                  .elementAt(_selectedOrderDishIndex);
+                              if (co.qty <= 1 && co.qtyprint < 0.01) {
+                                SocketMessage m = SocketMessage.dllplugin(
+                                    SocketMessage.op_remove_dish_from_order);
+                                m.addString(co.id);
+                                sendSocketMessage(m);
+                                return;
+                              }
+                              if (co.qty > 1 && co.qtyprint < 0.01) {
+                                SocketMessage m = SocketMessage.dllplugin(
+                                    SocketMessage.op_modify_order_dish);
+                                m.addString(co.id);
+                                m.addDouble(co.qty - 1);
+                                m.addString(co.comment);
+                                sendSocketMessage(m);
+                              }
+                            }, "images/minus.png", h: 48, w: 48),
+                            ClassOutlinedButton.createImage(() async {
+                              if (_selectedOrderDishIndex < 0) {
+                                return;
+                              }
+                              final ClassOrderDish co = _orderDishes
+                                  .elementAt(_selectedOrderDishIndex);
+                              if (co.qtyprint > 0.01) {
+                                return;
+                              }
+                              var qty = await ClassSetQtyDlg.getQty(
+                                  context, ClassDish.map[co.dishid]!.name);
+                              if (qty == null) {
+                                return;
+                              }
+                              if (qty == -1000) {
+                                SocketMessage m = SocketMessage.dllplugin(
+                                    SocketMessage.op_remove_dish_from_order);
+                                m.addString(co.id);
+                                sendSocketMessage(m);
+                                return;
+                              }
+                              if (qty < 0) {
+                                co.qty += qty * -1;
+                              } else {
+                                co.qty = qty!;
+                              }
+                              SocketMessage m = SocketMessage.dllplugin(
+                                  SocketMessage.op_modify_order_dish);
                               m.addString(co.id);
                               m.addDouble(co.qty);
                               m.addString(co.comment);
                               sendSocketMessage(m);
-                            });
-                          }
-                        }, "images/message.png", h: 48, w: 48),
-                        ClassOutlinedButton.createImage(() {
-                          if (widget.table.orderid == null || widget.table.orderid!.isEmpty) {
-                            return;
-                          }
-                          bool found = false;
-                          for (ClassOrderDish co in _orderDishes) {
-                            if (co.qtyprint < 0.01) {
-                              found = true;
-                              break;
-                            }
-                          }
-                          if (found) {
-                            sq(tr("Print order"), () {
-                              SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_print_service);
-                              m.addString(widget.table.orderid!);
-                              sendSocketMessage(m);
-                            }, () {});
-                          }
-                        }, "images/printer.png", h: 48, w: 48),
-                        Expanded(
-                            child: Container(
-                          color: Colors.green,
-                        )),
-                        Visibility(
-                            visible: Config.getInt(key_protocol_version) != 3,
-                            child: ClassOutlinedButton.createImage(() {
-                              if (widget.table.orderid == null || widget.table.orderid!.isEmpty) {
+                            }, "images/half.png", h: 48, w: 48),
+                            ClassOutlinedButton.createImage(() {
+                              if (_selectedOrderDishIndex < 0) {
+                                return;
+                              }
+                              final ClassOrderDish co = _orderDishes
+                                  .elementAt(_selectedOrderDishIndex);
+                              if (co.qtyprint > 0.01) {
+                                return;
+                              }
+                              if (co.qty > 0.01) {
+                                Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (BuildContext context) =>
+                                                WidgetDishComment(
+                                                    co.dishid, co.comment)))
+                                    .then((value) {
+                                  if (value == null) {
+                                    return;
+                                  }
+                                  setState(() {
+                                    co.comment = value;
+                                  });
+                                  SocketMessage m = SocketMessage.dllplugin(
+                                      SocketMessage.op_modify_order_dish);
+                                  m.addString(co.id);
+                                  m.addDouble(co.qty);
+                                  m.addString(co.comment);
+                                  sendSocketMessage(m);
+                                });
+                              }
+                            }, "images/message.png", h: 48, w: 48),
+                            ClassOutlinedButton.createImage(() {
+                              if (widget.table.orderid == null ||
+                                  widget.table.orderid!.isEmpty) {
                                 return;
                               }
                               bool found = false;
@@ -442,19 +503,48 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                                   break;
                                 }
                               }
-                              if (!found) {
-                                sq(tr("Print bill"), () {
-                                  SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_print_bill);
+                              if (found) {
+                                sq(tr("Print order"), () {
+                                  SocketMessage m = SocketMessage.dllplugin(
+                                      SocketMessage.op_print_service);
                                   m.addString(widget.table.orderid!);
                                   sendSocketMessage(m);
                                 }, () {});
-                              } else {
-                                sd(tr("Order is not completed"));
                               }
-                            }, "images/bill.png", h: 48, w: 48))
-                      ],
-                    ))
-              ]),
+                            }, "images/printer.png", h: 48, w: 48),
+                            Expanded(
+                                child: Container(
+                              color: Colors.green,
+                            )),
+                            Visibility(
+                                visible:
+                                    Config.getInt(key_protocol_version) != 3,
+                                child: ClassOutlinedButton.createImage(() {
+                                  if (widget.table.orderid == null ||
+                                      widget.table.orderid!.isEmpty) {
+                                    return;
+                                  }
+                                  bool found = false;
+                                  for (ClassOrderDish co in _orderDishes) {
+                                    if (co.qtyprint < 0.01) {
+                                      found = true;
+                                      break;
+                                    }
+                                  }
+                                  if (!found) {
+                                    sq(tr("Print bill"), () {
+                                      SocketMessage m = SocketMessage.dllplugin(
+                                          SocketMessage.op_print_bill);
+                                      m.addString(widget.table.orderid!);
+                                      sendSocketMessage(m);
+                                    }, () {});
+                                  } else {
+                                    sd(tr("Order is not completed"));
+                                  }
+                                }, "images/bill.png", h: 48, w: 48))
+                          ],
+                        ))
+                  ]),
               _orderMenu()
             ])));
   }
@@ -472,11 +562,16 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                   }),
               child: Container(
                   height: co.comment.isEmpty ? 50 : 60,
-                  color: index == _selectedOrderDishIndex ? const Color(0xA5DADEFF) : (co.qtyprint > 0.01 ? const Color(0xffffd561) : Colors.white),
+                  color: index == _selectedOrderDishIndex
+                      ? const Color(0xA5DADEFF)
+                      : (co.qtyprint > 0.01
+                          ? const Color(0xffffd561)
+                          : Colors.white),
                   padding: const EdgeInsets.only(top: 5, bottom: 5),
                   child: Container(
                       decoration: const BoxDecoration(
-                        border: Border(top: BorderSide(color: Color(0xffa0a0a0))),
+                        border:
+                            Border(top: BorderSide(color: Color(0xffa0a0a0))),
                       ),
                       child: Row(
                         children: [
@@ -497,17 +592,22 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                               margin: const EdgeInsets.only(top: 2),
                               child: Align(
                                   alignment: Alignment.centerLeft,
-                                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                    Text(
-                                      ClassDish.map[co.dishid]!.name,
-                                      textAlign: TextAlign.start,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                    Visibility(visible: co.comment.isNotEmpty, child: Text(co.comment))
-                                  ]))),
+                                  child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          ClassDish.map[co.dishid]!.name,
+                                          textAlign: TextAlign.start,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                        Visibility(
+                                            visible: co.comment.isNotEmpty,
+                                            child: Text(co.comment))
+                                      ]))),
                           Container(
                               margin: const EdgeInsets.only(top: 2),
                               child: Align(
@@ -523,7 +623,13 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
 
   String _getCarTitle() {
     String result = "";
-    result += widget.table.car == null ? "" : widget.table.car!.name + ", " + widget.table.car!.licensePlate + ", " + widget.table.customer!.name;
+    result += widget.table.car == null
+        ? ""
+        : widget.table.car!.name +
+            ", " +
+            widget.table.car!.licensePlate +
+            ", " +
+            widget.table.customer!.name;
     return result;
   }
 
@@ -583,7 +689,16 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                                   }
                                 });
                               }, "images/back.png"),
-                              Visibility(visible: !_searchVisible, child: Expanded(child: Container())),
+                              Visibility(
+                                  visible: !_searchVisible,
+                                  child: Expanded(child: Container())),
+                              Visibility(
+                                  visible: !_searchVisible,
+                                  child: ClassOutlinedButton.createImage(() {
+                                    setState(() {
+                                      _selectMenu = !_selectMenu;
+                                    });
+                                  }, "images/menu.png")),
                               Visibility(
                                   visible: !_searchVisible,
                                   child: ClassOutlinedButton.createImage(() {
@@ -631,6 +746,16 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                             Container(
                               height: 2,
                             ),
+                            AnimatedContainer(
+                              height: _selectMenu ? ClassMenus.list.length * 30 : 0,
+                                duration: const Duration(milliseconds: 300),
+                            child: SingleChildScrollView(
+                              child: Column (
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: _menuList()
+                              )
+                            )),
                             _part1(),
                             Expanded(child: _menuBody()),
                           ],
@@ -641,12 +766,32 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
         ));
   }
 
-  Widget _dishes(bool quick) {
-    ClassHall? h = ClassHall.getHall(widget.table.hallid);
-    if (h == null) {
-      return const Text("Hall is null");
+  List<Widget> _menuList() {
+    final List<Widget> l = [];
+    for (ClassMenus m in ClassMenus.list) {
+      l.add(Container(
+        height: 40,
+        width: double.infinity,
+        margin: const EdgeInsets.all(2),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: Colors.black12)
+        ),
+        child: InkWell(
+          onTap: (){
+            setState((){
+              _menuId = m.id;
+              _selectMenu = false;
+            });
+          },
+          child: Text(m.name, textAlign: TextAlign.left, style: const TextStyle(fontWeight: FontWeight.bold))
+        )
+      ));
     }
+    return l;
+  }
 
+  Widget _dishes(bool quick) {
     int colCount = 2;
     List<DataColumn> columns = [];
     for (int i = 0; i < colCount; i++) {
@@ -665,18 +810,52 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
         }
       } else {
         if (_dishSearchFilter.isNotEmpty) {
-          if (h.menu != md.menuid || !cd.name.toLowerCase().contains(_dishSearchFilter.toLowerCase())) {
+          if (_menuId != md.menuid ||
+              !cd.name
+                  .toLowerCase()
+                  .contains(_dishSearchFilter.toLowerCase())) {
             continue;
           }
-        } else if (_selectedType != md.typeid || h.menu != md.menuid) {
+        } else if (_selectedType != md.typeid || _menuId != md.menuid) {
           continue;
         }
       }
 
-      DataCell dc = DataCell(Container(margin: const EdgeInsets.only(top: 2), color: cd.bgColor, width: _menuWidth / colCount, child: Align(alignment: Alignment.center, child: Column(mainAxisAlignment: MainAxisAlignment.start, mainAxisSize: MainAxisSize.max, crossAxisAlignment: CrossAxisAlignment.start, children: [Expanded(child: Text(cd.name.toUpperCase(), textAlign: TextAlign.center, style: TextStyle(color: cd.textColor, fontSize: 13, fontWeight: FontWeight.bold))), Container(width: double.infinity, height: 20, decoration: BoxDecoration(border: Border.all(color: Colors.blueAccent), color: Colors.white), child: Text(textAlign: TextAlign.center, "${md.price}", style: const TextStyle(fontWeight: FontWeight.bold)))]))), onTap: () async {
+      DataCell dc = DataCell(
+          Container(
+              margin: const EdgeInsets.only(top: 2),
+              color: cd.bgColor,
+              width: _menuWidth / colCount,
+              child: Align(
+                  alignment: Alignment.center,
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                            child: Text(cd.name.toUpperCase(),
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    color: cd.textColor,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold))),
+                        Container(
+                            width: double.infinity,
+                            height: 20,
+                            decoration: BoxDecoration(
+                                border: Border.all(color: Colors.blueAccent),
+                                color: Colors.white),
+                            child: Text(
+                                textAlign: TextAlign.center,
+                                "${md.price}",
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold)))
+                      ]))), onTap: () async {
         md.dish = cd;
         if (ClassDishesSpecialCommentDlg.specialCommentForDish(md.dishid)) {
-          String? comment = await ClassDishesSpecialCommentDlg.getComment(context, md.dishid, cd.name);
+          String? comment = await ClassDishesSpecialCommentDlg.getComment(
+              context, md.dishid, cd.name);
           if (comment == null) {
             return;
           }
@@ -687,7 +866,8 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
             case 1:
             case 2:
               tempDish = md;
-              SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_create_header);
+              SocketMessage m =
+                  SocketMessage.dllplugin(SocketMessage.op_create_header);
               m.addInt(widget.table.id);
               sendSocketMessage(m);
               return;
@@ -713,7 +893,14 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
       rows.add(DataRow(cells: cells));
     }
 
-    return SingleChildScrollView(child: DataTable(horizontalMargin: 2, headingRowHeight: 0, dataRowHeight: 95, columnSpacing: 2, columns: columns, rows: rows));
+    return SingleChildScrollView(
+        child: DataTable(
+            horizontalMargin: 2,
+            headingRowHeight: 0,
+            dataRowHeight: 95,
+            columnSpacing: 2,
+            columns: columns,
+            rows: rows));
   }
 
   Widget _part1() {
@@ -734,7 +921,10 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                   color: Colors.black12,
                   height: 30,
                   width: 100,
-                  child: Align(alignment: Alignment.center, child: Text(co.name, style: const TextStyle(fontWeight: FontWeight.bold))),
+                  child: Align(
+                      alignment: Alignment.center,
+                      child: Text(co.name,
+                          style: const TextStyle(fontWeight: FontWeight.bold))),
                 ),
                 onTap: () {
                   setState(() {
@@ -747,11 +937,6 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
   }
 
   Widget _part2(int level) {
-    ClassHall? h = ClassHall.getHall(widget.table.hallid);
-    if (h == null) {
-      return const Text("Hall is null");
-    }
-
     List<int> p1 = [];
     for (ClassDishPart2 p in ClassDishPart2.list) {
       if (_part1Filter > 0 && p.part1 != _part1Filter) {
@@ -769,10 +954,12 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
     List<DataRow> rows = [];
     List<DataCell> cells = [];
     int col = 0;
-    final Set<int> availableList = ClassMenuDish.part2[h.menu]!;
+    final Set<int> availableList = ClassMenuDish.part2[_menuId]!;
     for (int i = 0; i < ClassDishPart2.list.length; i++) {
       final ClassDishPart2 d = ClassDishPart2.list.elementAt(i);
-      if (d.parentid != level || !availableList.contains(d.id) || !p1.contains(d.id)) {
+      if (d.parentid != level ||
+          !availableList.contains(d.id) ||
+          !p1.contains(d.id)) {
         continue;
       }
       DataCell dc = DataCell(
@@ -801,14 +988,20 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
         cells = [];
       }
     }
-    if (cells.length > 0) {
-      while (cells.length < colCount + 1) {
+    if (cells.isNotEmpty) {
+      while (cells.length < colCount) {
         cells.add(const DataCell(Text("")));
       }
       rows.add(DataRow(cells: cells));
     }
 
-    return SingleChildScrollView(child: DataTable(horizontalMargin: 2, headingRowHeight: 0, columnSpacing: 2, columns: columns, rows: rows));
+    return SingleChildScrollView(
+        child: DataTable(
+            horizontalMargin: 2,
+            headingRowHeight: 0,
+            columnSpacing: 2,
+            columns: columns,
+            rows: rows));
   }
 
   Widget _menuBody() {
@@ -834,7 +1027,8 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
   }
 
   void _sendDishToServer(ClassMenuDish md) {
-    SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_add_dish_to_order);
+    SocketMessage m =
+        SocketMessage.dllplugin(SocketMessage.op_add_dish_to_order);
     m.addString(widget.table.orderid!);
     m.addInt(md.dish!.id);
     m.addDouble(md.price);
