@@ -747,7 +747,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                               height: 2,
                             ),
                             AnimatedContainer(
-                              height: _selectMenu ? ClassMenus.list.length * 30 : 0,
+                              height: _selectMenu ? ClassMenus.list.length * 44 : 0,
                                 duration: const Duration(milliseconds: 300),
                             child: SingleChildScrollView(
                               child: Column (
