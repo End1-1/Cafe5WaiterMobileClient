@@ -21,6 +21,7 @@ import 'package:cafe5_waiter_mobile_client/widget_tables.dart';
 import 'package:cafe5_waiter_mobile_client/window_dish_comment.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'class_dishes_special_comment_dlg.dart';
@@ -491,6 +492,19 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                                 });
                               }
                             }, "images/message.png", h: 48, w: 48),
+                            ClassOutlinedButton.createImage(() {
+                              try {
+                                FlutterBarcodeScanner.scanBarcode(
+                                    '#ff6666', tr('Cancel'), true, ScanMode.QR)
+                                    .then((barcodeScanRes) {
+                                  if (barcodeScanRes.isEmpty) {
+                                    return;
+                                  }
+                                });
+                              } catch (e) {
+                                print(e);
+                              }
+                            }, 'images/qr.png', h:48, w:48),
                             ClassOutlinedButton.createImage(() {
                               if (widget.table.orderid == null ||
                                   widget.table.orderid!.isEmpty) {
