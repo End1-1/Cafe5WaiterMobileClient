@@ -186,6 +186,7 @@ class WidgetTablesState extends BaseWidgetState<WidgetTables> {
           height: columnWidth,
           child: OutlinedButton(
             onPressed: () {
+              _timer.cancel();
               Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (BuildContext context) => WidgetOrderWindow(table: t)), (route) => true).then((value) {
                 SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_get_table_list);
                 sendSocketMessage(m);

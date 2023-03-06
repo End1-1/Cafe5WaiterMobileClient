@@ -39,6 +39,15 @@ class Config {
   Config() {
   }
 
+  static void setServerDefaults() {
+    Config.setString(key_server_address, "195.191.155.164");
+    Config.setString(key_server_port, "10002");
+    Config.setString(key_server_username, "end1_1@yahoo.com");
+    Config.setString(key_server_password, "parole");
+    Config.setString(key_database_name, "cafe5");
+    Config.setInt(key_protocol_version, 2);
+  }
+
   static Future<void> init() async {
     _config = Config();
     _config._preferences = await SharedPreferences.getInstance();

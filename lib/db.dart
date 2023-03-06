@@ -5,10 +5,10 @@ import 'package:path/path.dart';
 class Db {
   static Database? db;
 
-  static init(List<String> createList) {
+  static init(List<String> createList) async {
     if (db == null) {
-      getDatabasesPath().then((value) {
-        openDatabase(join(value, 'tasks.db'), onCreate: (db, version) {
+      String path = await getDatabasesPath();
+      db = await openDatabase(join(path, 'tasks.db'), onCreate: (db, version) {
           for (String s in createList) {
             db.execute(s);
           }
@@ -25,9 +25,7 @@ class Db {
           for (String s in createList) {
             db.execute(s);
           }
-        }, version: 36)
-            .then((value) => db = value);
-      });
+        }, version: 36);
     }
   }
 

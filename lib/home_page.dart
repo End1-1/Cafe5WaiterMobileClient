@@ -474,13 +474,8 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
       return;
     }
     if (_pinController.text == "19810905") {
-      Config.setString(key_server_address, "");
-      Config.setString(key_server_port, "");
-      Config.setString(key_server_username, "");
-      Config.setString(key_server_password, "");
-      Config.setString(key_database_name, "");
-      Config.setInt(key_protocol_version, 0);
-      ClientSocket.init("",  0);
+      Config.setServerDefaults();
+      ClientSocket.init(Config.getString(key_server_address), int.tryParse(Config.getString(key_server_port)) ?? 10002);
       _pinController.clear();
       return;
     }
@@ -496,6 +491,7 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
 
   void _pin(String t) {
     _pinController.text += t;
+    _pinController.selection = TextSelection.fromPosition(TextPosition(offset: _pinController.text.length));
   }
 
   void _startWithoutDataLoad() async {

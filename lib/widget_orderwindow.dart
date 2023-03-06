@@ -43,6 +43,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
   bool _dataError = false;
   String _dataErrorString = "";
   bool _hideMenu = true;
+  bool _pausedForQr = false;
   int _menuAnimationDuration = 300;
   double _startx = 0;
   double _menuWidth = 0;
@@ -209,6 +210,9 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
             _selectedOrderDishIndex = -1;
           });
           break;
+        case SocketMessage.op_scandiscount:
+          sd(m.getString());
+          break;
         case SocketMessage.op_create_header:
           break;
       }
@@ -241,6 +245,7 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
     switch (state) {
       case AppLifecycleState.resumed:
         print('app resumed');
+        _pausedForQr = false;
         break;
 
       case AppLifecycleState.inactive:
@@ -248,11 +253,13 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
         break;
 
       case AppLifecycleState.paused:
-        SocketMessage m =
-            SocketMessage.dllplugin(SocketMessage.op_unlock_table);
-        m.addInt(widget.table.id);
-        m.addString(Config.getString(key_session_id));
-        sendSocketMessage(m);
+        if (!_pausedForQr) {
+          SocketMessage m =
+          SocketMessage.dllplugin(SocketMessage.op_unlock_table);
+          m.addInt(widget.table.id);
+          m.addString(Config.getString(key_session_id));
+          sendSocketMessage(m);
+        }
         break;
 
       case AppLifecycleState.detached:
@@ -492,15 +499,22 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                                 });
                               }
                             }, "images/message.png", h: 48, w: 48),
-                            ClassOutlinedButton.createImage(() {
+                            ClassOutlinedButton.createImage(() async {
+                              if (widget.table.orderid == null || widget.table.orderid!.isEmpty) {
+                                sd(tr("Order is empty"));
+                                return;
+                              }
                               try {
-                                FlutterBarcodeScanner.scanBarcode(
-                                    '#ff6666', tr('Cancel'), true, ScanMode.QR)
-                                    .then((barcodeScanRes) {
-                                  if (barcodeScanRes.isEmpty) {
+                                _pausedForQr = true;
+                                var barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+                                    '#ff6666', tr('Cancel'), true, ScanMode.QR);
+                                  if (barcodeScanRes.isEmpty || barcodeScanRes == '-1') {
                                     return;
                                   }
-                                });
+                                  SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_scandiscount);
+                                  m.addString(widget.table.orderid!);
+                                  m.addString(barcodeScanRes);
+                                  sendSocketMessage(m);
                               } catch (e) {
                                 print(e);
                               }

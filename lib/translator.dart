@@ -3,6 +3,7 @@ const Map<String, String> vals = {
   'no': 'Ոչ',
   'sign in':'Մուտք',
   'login':'Մուտք',
+  'order is empty': 'Դատարկ պատվեր',
   'username or password incorrect':'Գաղտնաբառը կամ օգտագործողը սխալ է',
   'tasks':'Առցանց պատվեր',
   'always use this hall': 'Միշտ օգտագործել այս սրահը',
