@@ -17,6 +17,7 @@ import 'package:cafe5_waiter_mobile_client/network_table.dart';
 import 'package:cafe5_waiter_mobile_client/socket_message.dart';
 import 'package:cafe5_waiter_mobile_client/translator.dart';
 import 'package:cafe5_waiter_mobile_client/widget_halls.dart';
+import 'package:cafe5_waiter_mobile_client/widget_manual_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -477,6 +478,11 @@ class WidgetHomeState extends BaseWidgetState with TickerProviderStateMixin {
       Config.setServerDefaults();
       ClientSocket.init(Config.getString(key_server_address), int.tryParse(Config.getString(key_server_port)) ?? 10002);
       _pinController.clear();
+      return;
+    }
+    if (_pinController.text == '1981') {
+      _pinController.clear();
+      Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => const WidgetManualSettings()));
       return;
     }
     setState(() {
