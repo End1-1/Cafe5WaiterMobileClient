@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "798620629711",
+    "project_id": "magnit-e84fe",
+    "storage_bucket": "magnit-e84fe.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:798620629711:android:d629faf7cd92f37b5d15ba",
+        "android_client_info": {
+          "package_name": "com.breezedevs.cafe5_waiter_mobile_client"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "798620629711-2cdh7mgkm9dkruncbrrgl4qkbqf76obs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDP-XzVmGYU9oEGFvik4CvK7G2Jhjb_9Mw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "798620629711-2cdh7mgkm9dkruncbrrgl4qkbqf76obs.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
