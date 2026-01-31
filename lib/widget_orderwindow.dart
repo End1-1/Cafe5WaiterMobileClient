@@ -21,7 +21,6 @@ import 'package:cafe5_waiter_mobile_client/widget_tables.dart';
 import 'package:cafe5_waiter_mobile_client/window_dish_comment.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'class_dishes_special_comment_dlg.dart';
@@ -506,15 +505,15 @@ class WidgetOrderWindowState extends BaseWidgetState<WidgetOrderWindow> {
                               }
                               try {
                                 _pausedForQr = true;
-                                var barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-                                    '#ff6666', tr('Cancel'), true, ScanMode.QR);
-                                  if (barcodeScanRes.isEmpty || barcodeScanRes == '-1') {
-                                    return;
-                                  }
-                                  SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_scandiscount);
-                                  m.addString(widget.table.orderid!);
-                                  m.addString(barcodeScanRes);
-                                  sendSocketMessage(m);
+                              //   var barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+                              //       '#ff6666', tr('Cancel'), true, ScanMode.QR);
+                              //     if (barcodeScanRes.isEmpty || barcodeScanRes == '-1') {
+                              //       return;
+                              //     }
+                              //     SocketMessage m = SocketMessage.dllplugin(SocketMessage.op_scandiscount);
+                              //     m.addString(widget.table.orderid!);
+                              //     m.addString(barcodeScanRes);
+                              //     sendSocketMessage(m);
                               } catch (e) {
                                 print(e);
                               }

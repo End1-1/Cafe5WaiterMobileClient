@@ -74,6 +74,8 @@ class WidgetReadyDishesState extends BaseWidgetState<WidgetReadyDishes> {
 
       case AppLifecycleState.detached:
         break;
+      case AppLifecycleState.hidden:
+        break;
     }
   }
 
